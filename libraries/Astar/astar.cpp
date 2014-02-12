@@ -12,7 +12,7 @@ stack<SearchNode> astar(SearchNode start, SearchNode goal) {
 		queue<SearchNode> n = start.neighbors();
 		while (!n.empty()) {
 			pq.push(n.front());
-			n.pop;
+			n.pop();
 		}
 		start = pq.top();
 		pq.pop();
