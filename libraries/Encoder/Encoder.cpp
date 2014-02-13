@@ -1,25 +1,34 @@
 #include <Arduino.h>
 #include <Encoder.h>
 
-Encoder::Encoder(pin_t pinA, pin_t pinB, float distPerCount, int timeout, bool invert) :
-  pA(pinA), pB(pinB), fDistPerCount(distPerCount), iTimeout(timeout), isInverted(invert)
-{
+void Encoder::init(pin_t pinA, pin_t pinB, float distPerCount, int timeout, bool invert) {
+  pA = pinA;
+  pB = pinB;
+  fDistPerCount = distPerCount;
+  iTimeout = timeout;
+  isInverted = invert;
+
+  // Set both pins as digital inputs.
   pinMode(pA, INPUT);
   pinMode(pB, INPUT);
 
-  fPeriod = {0.0f};
+  // Reset the period averager.
+  for (int i = 0; i < AVERAGE_COUNT; i++)
+    fPeriod[i] = 0.0f;
   sLoopCounter = 0;
 }
   
-long Encoder::getDistance(){
+float Encoder::getDistance(){
+  // Units: length/count * count = length
   return fDistPerCount * (float)iCount;
 }
 
 float Encoder::getSpeed(){
-  if(micros() - lastTime >= timeout){
+  if(micros() - iLastTime >= iTimeout){
     fSpeed = 0.0f;
-    lastTime = micros() - timeout;
+    iLastTime = micros() - iTimeout;
   } else {
+    // Units: (length/count) / (micros/count) * (micros/second) = length/second
     fSpeed = (fDistPerCount / this->getPeriod()) * 1000000.0f;
     if (!bDirection) fSpeed *= -1.0f;
   }
@@ -27,7 +36,7 @@ float Encoder::getSpeed(){
 }
 
 long Encoder::getCount(){
-  return fCount;
+  return iCount;
 }
 
 float Encoder::getPeriod() {
@@ -47,10 +56,12 @@ void Encoder::setTimeout(long timeout){
 void Encoder::reset(){
   iCount = 0;
   fSpeed = 0;
-  fPeriod = {0.0f};
+
+  for (int i = 0; i < AVERAGE_COUNT; i++)
+    fPeriod[i] = 0.0f;
 }
 
-double Encoder::getDistancePerCount(){
+float Encoder::getDistancePerCount(){
   return fDistPerCount;
 }
 
@@ -59,7 +70,7 @@ bool Encoder::stopped(){
 
 }
 int Encoder::direction(){
-  double s = this->getSpeed();
+  float s = this->getSpeed();
   if(s > 0){ return  1; }
   if(s < 0){ return -1; }
   return 0;
@@ -71,7 +82,7 @@ void Encoder::encoderEvent(bool mode){
   long currentTime = micros();
 
   // Determine instantaneous period
-  float instantPeriod = (float)(currentTime - lastTime);
+  float instantPeriod = (float)(currentTime - iLastTime);
   
   // Snity check (can't be having infinite speeds here!)
   // Note: 1000000 microseconds per second
@@ -84,14 +95,14 @@ void Encoder::encoderEvent(bool mode){
   (++sLoopCounter) %= AVERAGE_COUNT;
 
   // Update lastTime with currentTime
-  lastTime = currentTime;
+  iLastTime = currentTime;
   
   // Increment or decrement the count
-  if(digitalRead(pinA) == (digitalRead(pinB) ^ !invert ^ mode)) {
-    count++;
+  if(digitalRead(pA) == (digitalRead(pB) ^ !isInverted ^ mode)) {
+    iCount++;
     bDirection = true;
   } else {
-    count--;
+    iCount--;
     bDirection = false;;
   }
 }

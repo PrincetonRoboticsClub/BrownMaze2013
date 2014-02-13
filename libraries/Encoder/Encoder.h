@@ -34,28 +34,31 @@ class Encoder{
 
     short sLoopCounter;
 
+    void init(pin_t pinA, pin_t pinB, float distPerCount, int timeout, bool invert);
+
 
   public:
-    Encoder(pin_t pinA, pin_t pinB, float radius, float countPerRotation, int timeout, bool invert) :
-        Encoder(pinA, pinB, 2*PI*radius/countPerRotation, timeout, invert) {}
+    Encoder(pin_t pinA, pin_t pinB, float radius, float countPerRotation, int timeout, bool invert)
+        { init(pinA, pinB, 2*PI*radius / countPerRotation, timeout, invert); }
 
-    Encoder(pin_t pinA, pin_t pinB, float radius, float countPerRotation, bool invert) :
-        Encoder(pinA, pinB, radius, countPerRotation, DEFAULT_TIMEOUT, invert) {}
+    Encoder(pin_t pinA, pin_t pinB, float radius, float countPerRotation, bool invert)
+        { init(pinA, pinB, 2*PI*radius / countPerRotation, DEFAULT_TIMEOUT, invert); }
 
-	Encoder(pin_t pinA, pin_t pinB, float distPerCount, bool invert) :
-        Encoder(pinA, pinB, distPerCount, DEFAULT_TIMEOUT, invert) {}
+	Encoder(pin_t pinA, pin_t pinB, float distPerCount, bool invert)
+        { init(pinA, pinB, distPerCount, DEFAULT_TIMEOUT, invert); }
 
-    Encoder(pin_t pinA, pin_t pinB, float distPerCount, int timeout, bool invert);
+    Encoder(pin_t pinA, pin_t pinB, float distPerCount, int timeout, bool invert)
+        { init(pinA, pinB, distPerCount, timeout, invert); }
   
-    float getDistance();
-    float getSpeed();
-    float getCount();
-    float getPeriod();
-    void setTimeout(long timeout);
-    void reset();
-    float getDistancePerCount();
-    bool stopped();
-    int direction();
+    float   getDistance();
+    float   getSpeed();
+    long    getCount();
+    float   getPeriod();
+    void    setTimeout(long timeout);
+    void    reset();
+    float   getDistancePerCount();
+    bool    stopped();
+    int     direction();
 
     void encoderEvent(bool mode);
 };
