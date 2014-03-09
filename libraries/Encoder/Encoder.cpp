@@ -84,12 +84,6 @@ void Encoder::encoderEvent(bool mode){
   // Determine instantaneous period
   float instantPeriod = (float)(currentTime - iLastTime);
   
-  // Snity check (can't be having infinite speeds here!)
-  // Note: 1000000 microseconds per second
-  // Units: m/count * 1 count / us * 1000000 us/s = m/s
-  // if(distancePerCount / instantPeriod * 1000000 > 100){ return; }
-  // Commented out for speed purposes
-  
   // Overwrite oldest period
   fPeriod[sLoopCounter] = instantPeriod;
   (++sLoopCounter) %= AVERAGE_COUNT;
@@ -103,6 +97,6 @@ void Encoder::encoderEvent(bool mode){
     bDirection = true;
   } else {
     iCount--;
-    bDirection = false;;
+    bDirection = false;
   }
 }

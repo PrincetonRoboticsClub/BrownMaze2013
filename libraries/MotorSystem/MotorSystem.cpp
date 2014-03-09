@@ -42,9 +42,9 @@ void MotorSystem::test(float speed){
   mRight->writeSpeed(speed);
 }
 
-void MotorSystem::stop(){
-  mLeft->stop();
-  mRight->stop();
+void MotorSystem::brake(){
+  mLeft->brake();
+  mRight->brake();
 }
 
 void MotorSystem::coast(){

@@ -25,7 +25,7 @@ class MotorSystem{
     void tank(double left, double right);
 
     void coast();
-    void stop();
+    void brake();
 
     double getLeft();
     double getRight();

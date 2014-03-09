@@ -24,7 +24,7 @@ typedef	int	pin_t;
  		Motor(pin_t a1, pin_t a2, pin_t speedPinEN, bool invert);
 
  		// Instantly stops the motor at a BRAKE.
- 		void	stop();
+ 		void	brake();
 
  		// Instantly stops the motor at a COAST.
  		void	coast();

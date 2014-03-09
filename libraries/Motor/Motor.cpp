@@ -11,7 +11,7 @@ Motor::Motor(pin_t a1, pin_t a2, pin_t speedPinEN, bool invert) :
 	pinMode(pEN,	OUTPUT);
 }
 
-void Motor::stop() {
+void Motor::brake() {
 	analogWrite(pEN,	MOTOR_MAX);
 
 	digitalWrite(pA1,	LOW);
