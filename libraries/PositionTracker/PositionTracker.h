@@ -16,7 +16,7 @@
 #ifndef PositionTracker_h
 #define PositionTracker_h
 
-#include <Arduino.h>
+//#include <Arduino.h>
 #include <Encoder.h>
 
 class PositionTracker{

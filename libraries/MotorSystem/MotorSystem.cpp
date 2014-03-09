@@ -1,9 +1,11 @@
 #include <Arduino.h>
 #include <MotorSystem.h>
 
-MotorSystem::MotorSystem(Motor* left, Motor* right) :
-  mLeft(left), mRight(right) 
-{ }
+MotorSystem::MotorSystem(Motor* left, Motor* right)
+{ 
+   mLeft = left;
+   mRight = right;
+}
 
 MotorSystem::~MotorSystem() {
   delete mLeft;
@@ -12,14 +14,14 @@ MotorSystem::~MotorSystem() {
 
 void MotorSystem::arcade(float straight, float turn){
 
-  float aStright = abs(straight);
+  float aStraight = abs(straight);
   float aTurn = abs(turn);
 
   float right = max(aStraight, aTurn);
   float left = aStraight - aTurn;
   
   if (aTurn != turn) {
-    float tmp = left;
+    float temp = left;
     left = right;
     right = temp;
   }

@@ -21,7 +21,7 @@ void Motor::brake() {
 }
 
 void Motor::coast() {
-	analogWrite(pEn, 0);
+	analogWrite(pEN, 0);
 
 	fCurrentSpeed = 0.0;
 }
@@ -35,6 +35,6 @@ void Motor::writeSpeed(float speed) {
 	digitalWrite(pA1,	(speed < 0) ^ bInverted);
 }
 
-void Motor::getSpeed() {
+float Motor::getSpeed() {
 	return fCurrentSpeed;
 }

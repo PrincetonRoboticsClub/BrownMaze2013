@@ -13,7 +13,7 @@
 #ifndef MotorSystem_h
 #define MotorSystem_h
 
-#include <Arduino.h>
+//#include <Arduino.h>
 #include <Motor.h>
 
 class MotorSystem{
@@ -21,19 +21,19 @@ class MotorSystem{
     MotorSystem(Motor* left, Motor* right);
     ~MotorSystem();
 
-    void arcade(double straight, double turn);
-    void tank(double left, double right);
+    void arcade(float straight, float turn);
+    void tank(float left, float right);
 
     void coast();
     void brake();
 
-    double getLeft();
-    double getRight();
+    float getLeft();
+    float getRight();
 	
-	void test(double spd);
+	void test(float spd);
 	
   private:
-    Motor* mLeft, mRight;
+    Motor* mLeft, *mRight;
 	
 };
 

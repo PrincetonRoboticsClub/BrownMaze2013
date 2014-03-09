@@ -11,12 +11,12 @@ void PositionTracker::compute(){
   long dL = leftEncoder->getCount()  - leftCount;
   long dR = rightEncoder->getCount() - rightCount;
   leftCount += dL;
-  lastRight += dR;
+  rightCount += dR;
   
-  double ds = leftEncoder->getDistancePerCount() * (nR+nL)/2;
+  double ds = leftEncoder->getDistancePerCount() * (dR+dL)/2;
   x     += ds*cos(angle);
   y     += ds*sin(angle);
-  angle += leftEncoder->getDistancePerCount()/wheelBase * (nL-nR);
+  angle += leftEncoder->getDistancePerCount()/fWheelBase * (dL-dR);
 }
 
 double PositionTracker::getXCoord(){ return x; }
