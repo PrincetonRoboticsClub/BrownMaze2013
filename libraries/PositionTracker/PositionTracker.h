@@ -21,10 +21,7 @@
 
 class PositionTracker{
   public:
-    PositionTracker(int pins[4], bool inverts[2], 
-                    double r, double cpr, int t, double wb);
-	PositionTracker(int pins[4], bool inverts[2], 
-                    double distancePerCount, int t, double wb);
+    PositionTracker(Encoder* eLeft, Encoder* eRight, float wheelBase);
 					
     void compute();
     
@@ -33,23 +30,16 @@ class PositionTracker{
     double getAngle();
     
     void reset();
-    void mod();
 
     double getSpeed();
     double getAngularSpeed();
 
-    void leftEncoderEventA();
-	void leftEncoderEventB();
-    void rightEncoderEventA();
-	void rightEncoderEventB();
-
   private:
-    double wheelBase;
-    Encoder leftEncoder;
-    Encoder rightEncoder;
-    double x,y,angle;
-    int lastLeft, lastRight;
-	bool leftInvert, rightInvert;
+    float fWheelBase;
+    Encoder* leftEncoder;
+    Encoder* rightEncoder;
+    float x, y, angle;
+    long leftCount, rightCount;
 };
 
 #endif
