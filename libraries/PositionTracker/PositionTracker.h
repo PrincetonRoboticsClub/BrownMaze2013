@@ -33,6 +33,11 @@ class PositionTracker{
 
     double getSpeed();
     double getAngularSpeed();
+    
+    void interruptL1();
+    void interruptL2();
+    void interruptR1();
+    void interruptR2();
 
   private:
     float fWheelBase;
