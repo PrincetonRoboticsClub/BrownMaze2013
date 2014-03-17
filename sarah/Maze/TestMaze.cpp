@@ -92,6 +92,11 @@ int main(void) {
    assert(test3.getLengthX() == 16);
    assert(test3.getLengthY() == 15);
    assert(test3.getSize() == 16 * 15);
+
+   assert((*test3.getStartNode()).getXCoor() == 0);
+   assert((*test3.getStartNode()).getYCoor() == 0);
+   assert((*test3.getTargetNode()).getXCoor() == 15);
+   assert((*test3.getTargetNode()).getYCoor() == 14);
    test3.freeMaze();
 
    /******************************** Brain *********************************/

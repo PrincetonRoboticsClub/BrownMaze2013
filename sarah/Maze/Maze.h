@@ -88,6 +88,8 @@ class Maze {
       returns 1 if successful and 0 if unsuccessful */
    int findShortestSolutionPath();
 
+   void changeCurrentNode(int x, int y);
+   
    void freeMaze();
 };
 

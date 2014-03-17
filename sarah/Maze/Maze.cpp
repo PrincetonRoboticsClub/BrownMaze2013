@@ -41,7 +41,7 @@ void Maze::setValues(int lenX, int lenY, int startX, int startY, int targetX, in
    /* the maze is represented by an array of nodes, each node representing
       a tile within the maze. It intializes a clean maze with no walls 
       or paths traversed yet.*/	
-   mazeArray = (MazeNode **) malloc(6144);
+   mazeArray = (MazeNode **) malloc(sizeof(MazeNode)*lengthX*lengthY);
    bool w[4] = {false, false, false, false};
 
    for (int i = 0; i < lengthX; i++) {
@@ -51,7 +51,6 @@ void Maze::setValues(int lenX, int lenY, int startX, int startY, int targetX, in
       }
    }  
 
-   printf("should be 0 %d\n", (*mazeArray[0]).getYCoor());
    /* pointers to the start, target, and current nodes in the maze array */
    nodeStart = mazeArray[getArrayIndex(startX, startY, lengthX)];
    nodeTarget = mazeArray[getArrayIndex(targetX, targetY, lengthX)];
@@ -145,6 +144,14 @@ int Maze::findShortestSolutionPath() {
    return 0;
 }
 
-void Maze::freeMaze() {
+void Maze::changeCurrentNode(int x, int y) {
+   currentPosition = mazeArray[getArrayIndex(x, y, lengthX)];
+}
 
+void Maze::freeMaze() {
+   for (int i = 0; i < lengthX; i++) {
+      for (int j = 0; j < lengthY; j++) {
+         free(mazeArray[getArrayIndex(i, j, lengthX)]);
+      }
+   }  
 }
