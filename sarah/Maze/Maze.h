@@ -15,6 +15,8 @@
 #include "MazeNode.h"
 #include <vector>
 
+enum Adjacent {ABOVE, BELOW, RIGHT, LEFT};
+
 class Maze {
 
   private:
@@ -75,6 +77,8 @@ class Maze {
    /* Returns pointer node to the left (lower X coordinate) of specified coordinates */
    MazeNode *getNodeLeft(int x, int y);
 
+   bool edgeOfArray(int x, int y, enum Adjacent dir);
+
    /* Increments number of Nodes traversed */
    void incrementNumOfNodesTraversed();
    
@@ -89,7 +93,7 @@ class Maze {
    int findShortestSolutionPath();
 
    void changeCurrentNode(int x, int y);
-   
+
    void freeMaze();
 };
 

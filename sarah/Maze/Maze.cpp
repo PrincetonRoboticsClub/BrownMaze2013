@@ -16,9 +16,27 @@
 #include <math.h>
 #include "Maze.h"
 
+enum {INT_MAX = 100000};
+
 /* Returns 1-D array index x, y coordinates */
 static int getArrayIndex(int x, int y, int width) {
    return width * x + y;
+}
+
+bool Maze::edgeOfArray(int x, int y, enum Adjacent dir) {
+   if (dir == ABOVE) {
+      if (y == 0) return true;
+   }
+   else if (dir == BELOW) {
+      if (y == lengthY - 1) return true;
+   } 
+   else if (dir == RIGHT) {
+      if (x == lengthX - 1) return true;
+   }
+   else if (dir == LEFT) {
+      if (x == 0) return true;
+   }
+   return false;
 }
 
 /* Maze constructor takes dimensions of a rectangular maze represented
@@ -47,7 +65,7 @@ void Maze::setValues(int lenX, int lenY, int startX, int startY, int targetX, in
    for (int i = 0; i < lengthX; i++) {
       for (int j = 0; j < lengthY; j++) {
          mazeArray[getArrayIndex(i, j, lengthX)] = (MazeNode *) malloc(sizeof(MazeNode));
-         (*mazeArray[getArrayIndex(i, j, lengthX)]).setValues(i, j, abs(i - targetX) + abs(j - targetY), abs(i - startX) + abs(j - startY), w);
+         mazeArray[getArrayIndex(i, j, lengthX)]->setValues(i, j, abs(i - targetX) + abs(j - targetY), lengthX + lengthY, w);
       }
    }  
 
@@ -128,9 +146,47 @@ void Maze::incrementNumOfNodesTraversed() {
    numTraversed++;
 }
    
-/* Applies A Star algorithm and returns 1 if successful and 0 if unsuccessful */
+/* Applies A Star algorithm and returns 1 if successful and 0 if unsuccessful or
+   a path has already been found */
 int Maze::applyAStarAlgorithm() {
-   return 0;
+   if (this->pathFound) return 0;
+
+   for ( ; ; ) {
+      currentPosition->incrementNumOfTraversals();
+      if (currentPosition == nodeTarget) {
+         pathFound = true;
+         break;
+      }
+
+      MazeNode *next = nodeStart;
+      int score = INT_MAX;
+      int x = currentPosition->getXCoor();
+      int y = currentPosition->getYCoor();
+
+      if (!currentPosition->rightWall() && !this->edgeOfArray(x, y, RIGHT) && getNodeRight(x, y)->getScore() < score) {
+         score = getNodeRight(x, y)->getScore();
+         next = this->getNodeRight(x, y);
+      }
+      if (!currentPosition->leftWall() && !this->edgeOfArray(x, y, LEFT) && getNodeLeft(x, y)->getScore() < score) {
+         score = getNodeLeft(x, y)->getScore();
+         next = this->getNodeLeft(x, y);
+      }
+      if (!currentPosition->topWall() && !this->edgeOfArray(x, y, ABOVE) && getNodeAbove(x, y)->getScore() < score) {
+         score = getNodeAbove(x, y)->getScore();
+         next = this->getNodeAbove(x, y);
+      }
+      if (!currentPosition->bottomWall() && !this->edgeOfArray(x, y, BELOW) && getNodeBelow(x, y)->getScore() < score) {
+         score = getNodeBelow(x, y)->getScore();
+         next = this->getNodeBelow(x, y);
+      }
+
+      if (currentPosition->getNumOfTraversals() == 1) 
+         numTraversed++;
+      currentPosition = next;
+      printf("current position %d %d\n", currentPosition->getXCoor(), currentPosition->getYCoor());
+   }
+   
+   return 1;
 }
 
 /* Applies Tremaux algorithm and returns 1 if successful and 0 if unsuccessful */

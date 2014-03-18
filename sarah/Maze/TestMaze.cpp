@@ -74,7 +74,6 @@ int main(void) {
          assert((*test3.getNode(i, j)).getXCoor() == i);
          assert((*test3.getNode(i, j)).getYCoor() == j);
          assert((*test3.getNode(i, j)).getManhattanDist() == abs(i - 15) + abs(j - 14));
-         assert((*test3.getNode(i, j)).getStartDist() == abs(i - 0) + abs(j - 0));
          assert((*test3.getNode(i, j)).rightWall() == false);
          assert((*test3.getNode(i, j)).leftWall() == false);
          assert((*test3.getNode(i, j)).topWall() == false);
@@ -98,6 +97,18 @@ int main(void) {
    assert((*test3.getTargetNode()).getXCoor() == 15);
    assert((*test3.getTargetNode()).getYCoor() == 14);
    test3.freeMaze();
+
+   Maze test4;
+   test4.setValues(16, 15, 0, 0, 15, 14);
+
+   test4.applyAStarAlgorithm();
+   for (int j = 0; j < 15; j++) {
+      for (int i = 0; i < 16; i++) {
+         printf("| %d ", (test4.getNode(i, j))->getNumOfTraversals());
+      }
+      printf("|\n");
+   }
+   test4.freeMaze();
 
    /******************************** Brain *********************************/
    printf("-----------------------------------------------------------\n");
