@@ -32,7 +32,7 @@ void Motor::writeSpeed(float speed) {
 	analogWrite(pEN,	fCurrentSpeed);
 
 	digitalWrite(pA1,	(speed > 0) ^ bInverted);
-	digitalWrite(pA1,	(speed < 0) ^ bInverted);
+	digitalWrite(pA2,	(speed < 0) ^ bInverted);
 }
 
 float Motor::getSpeed() {
