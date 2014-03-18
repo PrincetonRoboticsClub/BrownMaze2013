@@ -17,6 +17,8 @@
 ******************************************************************************/
 
 
+enum Wall {ABOVE_W = 1, BELOW_W = 2, RIGHT_W = 3, LEFT_W = 4};
+
 #ifndef MAZENODE_H
 #define MAZENODE_H
 
@@ -38,6 +40,7 @@ class MazeNode {
     int startDist; // distance (in number of nodes traversed) from start node
     struct NodeWalls walls; // find out if there are any walls around the node
     int numOfTraversals; // number of times node crossed in finding a sucessful path
+    bool solutionNode; // true if part of solution path, false otherwise
 
   public:
     /* Constructor function takes in coordinates (coorX and coorY), a manhattan distance,
@@ -70,17 +73,8 @@ class MazeNode {
     /* Returns number of traversals of this node in finding the path */
     int getNumOfTraversals();
     
-    /* Returns whether or not there is a right/positive X wall */
-    bool rightWall();
-    
-    /* Returns whether or not there is a bottom/positive Y wall */
-    bool bottomWall();
-
-    /* Returns whether or not there is a left/negative X wall */
-    bool leftWall();
-
-    /* Returns whether or not there is a top/negative Y wall */
-    bool topWall();
+    /* Returns whether or not there is a wall in the indicated direction */
+    bool hasWall(enum Wall dir);
 
     /* Update the walls of the node */
     void updateWalls(bool newWalls[]);
@@ -93,6 +87,15 @@ class MazeNode {
     /* Change distance in nodes from start node. Should not be able to 
        change Manhattan Distance. */
     void setStartDist(int dist);
+
+    /* Marks the node as a part of the solution path */
+    void markSolution();
+
+    /* Marks the node as a part of the solution path */
+    void unmarkSolution();
+
+    /* Returns true if node is part of solution, false otherwise */
+    bool checkSolution();
 
 };
 

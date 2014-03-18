@@ -102,12 +102,52 @@ int main(void) {
    test4.setValues(16, 15, 0, 0, 15, 14);
 
    test4.applyAStarAlgorithm();
+
+   printf("\nMazeArray's Number of Traversals\n");
    for (int j = 0; j < 15; j++) {
       for (int i = 0; i < 16; i++) {
          printf("| %d ", (test4.getNode(i, j))->getNumOfTraversals());
       }
       printf("|\n");
    }
+
+   printf("\nMazeArray's ManhattanDist\n");
+   for (int j = 0; j < 15; j++) {
+      for (int i = 0; i < 16; i++) {
+         printf("| %2d ", (test4.getNode(i, j))->getManhattanDist());
+      }
+      printf("|\n");
+   }
+
+   printf("\nMazeArray's Score\n");
+   for (int j = 0; j < 15; j++) {
+      for (int i = 0; i < 16; i++) {
+         printf("| %2d ", (test4.getNode(i, j))->getScore());
+      }
+      printf("|\n");
+   }
+
+   printf("\nMazeArray's Solution Nodes\n");
+   for (int j = 0; j < 15; j++) {
+      for (int i = 0; i < 16; i++) {
+         printf("| %2d ", (test4.getNode(i, j))->checkSolution());
+      }
+      printf("|\n");
+   }
+
+   int size = 256;
+   enum Adjacent path[size];
+   test4.findShortestSolutionPath(path, &size);
+   printf("\n\nSolution path:\n");
+   for (int m = 0; m < 35; m++) {
+      switch (path[m]) {
+         case RIGHT: printf("RIGHT "); break;
+         case LEFT: printf("LEFT "); break;
+         case BELOW: printf("DOWN "); break;
+         case ABOVE: printf("UP "); break;
+      }
+   }
+   printf("\n");
    test4.freeMaze();
 
    /******************************** Brain *********************************/
