@@ -15,6 +15,8 @@
 #include "MazeNode.h"
 #include <vector>
 
+enum Adjacent {ABOVE = 1, BELOW = 2, RIGHT = 3, LEFT = 4};
+
 class Maze {
 
   private:
@@ -63,17 +65,10 @@ class Maze {
    /* Returns pointer node with specified coordinates */
    MazeNode *getNode(int x, int y);
 
-   /* Returns pointer node above (lower Y coordinate) specified coordinates */
-   MazeNode *getNodeAbove(int x, int y);
-   
-   /* Returns pointer node below (higher Y coordinate)  specified coordinates */
-   MazeNode *getNodeBelow(int x, int y);
+   /* Returns pointer adjacent node as indicated by dir to the specified coordinates */
+   MazeNode *getAdjacentNode(int x, int y, enum Adjacent dir);
 
-   /* Returns pointer node to the right (higher X coordinate) of specified coordinates */
-   MazeNode *getNodeRight(int x, int y);
-
-   /* Returns pointer node to the left (lower X coordinate) of specified coordinates */
-   MazeNode *getNodeLeft(int x, int y);
+   bool edgeOfArray(int x, int y, enum Adjacent dir);
 
    /* Increments number of Nodes traversed */
    void incrementNumOfNodesTraversed();
@@ -81,15 +76,14 @@ class Maze {
    /* Applies A Star algorithm and returns 1 if successful and 0 if unsuccessful */
    int applyAStarAlgorithm();
 
-   /* Applies Tremaux algorithm and returns 1 if successful and 0 if unsuccessful */
-   int applyTremauxAlgorithm();
-
    /* Only use after applying an algorithm. Finds the shortest path and 
       returns 1 if successful and 0 if unsuccessful */
-   int findShortestSolutionPath();
+   enum Adjacent *findShortestSolutionPath(enum Adjacent path[], int *size, MazeNode *start, MazeNode *end);
 
+   /* Changes position of current node */
    void changeCurrentNode(int x, int y);
-   
+
+   /* Frees memory of nodes */
    void freeMaze();
 };
 
