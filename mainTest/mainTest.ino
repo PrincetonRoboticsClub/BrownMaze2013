@@ -16,7 +16,7 @@
 
 // Dimensions (cm)
 #define WHEEL_RADIUS 2
-#define WHEEL_BASE 7
+#define WHEEL_BASE 8.5
 
 #define COUNT_PER_REV 1200
 
@@ -54,7 +54,7 @@ void setup() {
          new Encoder(PIN_E2A, PIN_E2B, WHEEL_RADIUS, COUNT_PER_REV, TIMEOUT, true), WHEEL_BASE);
 
   distancePID = new PID(0.1, 0, 0);
-  anglePID = new PID(0.6, 0.05, 0);
+  anglePID = new PID(1.2, 0.01, 0.01);
 
   ms->brake();
   
@@ -64,24 +64,32 @@ void setup() {
   
 }
 
+long lastTime = millis();
+
 void loop() {
+  if (millis() - lastTime > 20) {
+    lastTime = millis();
+  
+  
   double straight, turn;
   
   pt->compute();
-  /*
-  straight = distancePID->compute(pt->getXCoord(), 20);
-  turn = anglePID->compute(pt->getAngle(), 0);
+  
+  
+  //straight = distancePID->compute(pt->getXCoord(), 20);
+  straight = 0.8;
+  turn = anglePID->compute(pt->getAngle(), 0) + 0.0;
   
   if(digitalRead(13)) {
-    if(abs(20 - pt->getXCoord()) < 0.1)
-      ms->arcade(0, turn);
-    else 
-      ms->arcade(straight, turn);
+    //if(abs(20 - pt->getXCoord()) < 0.1)
+    //  ms->arcade(0, turn);
+    //else 
+    ms->arcade(straight, turn);
       //ms->tank(0, 0);
   } else {
     ms->brake();
   }
-  */
+  
     
   Serial.print("Speed: ");
   Serial.print(pt->getSpeed());
@@ -92,6 +100,8 @@ void loop() {
   Serial.print("); ");
   Serial.print("Angle: ");
   Serial.println(pt->getAngle() * 180.0 / (3.14159));
+  
+  }
 }
 
 void intL1() {
