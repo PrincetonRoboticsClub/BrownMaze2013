@@ -1,0 +1,6 @@
+Motor	KEYWORD1
+
+stop	KEYWORD2
+coast	KEYWORD2
+writeSpeed	KEYWORD2
+getSpeed	KEYWORD2
