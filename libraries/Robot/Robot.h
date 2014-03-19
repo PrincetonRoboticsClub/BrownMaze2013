@@ -64,6 +64,10 @@
  	float getY();
  	float getAngle();
 
+ 	float getSpeed();
+ 	float getLeftSpeed();
+ 	float getRightSpeed();
+
  	// Getters
  	State getState();
  	Motor* getLeftMotor();

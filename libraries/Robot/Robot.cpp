@@ -4,11 +4,20 @@
 #include <PID.h>
 #include <Arduino.h>
 
+// Fudge Factors
+#define ANGLE_DEADBAND 0.03f
+#define POS_DEADBAND 3.0f
 
 /*** Static Functions ***/
 
 float euclidean(float x1, float y1, float x2, float y2) {
 	return sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
+}
+
+float angleClamp(float angle) {
+	while(angle > PI) angle -= 2*PI;
+	while(angle < -PI) angle += 2*PI;
+	return angle;
 }
 
 /*** Class Functions ***/
@@ -58,6 +67,15 @@ float Robot::getY() {
 float Robot::getAngle() {
 	return fAngle;
 }
+float Robot::getSpeed() {
+  return (eLeft->getSpeed() + eRight->getSpeed()) * 0.5;
+}
+float Robot::getLeftSpeed() {
+	return eLeft->getSpeed();
+}
+float Robot::getRightSpeed() {
+	return eRight->getSpeed();
+}
 
 State Robot::getState() {
 	return sCurrentState;
@@ -86,13 +104,13 @@ void Robot::arcade(float straight, float turn) {
 	float aStraight = abs(straight);
 	float aTurn = abs(turn);
 
-	float right = max(aStraight, aTurn);
-	float left = aStraight - aTurn;
+	float left = max(aStraight, aTurn);
+	float right = aStraight - aTurn;
 
 	if (aTurn != turn) {
-		float temp = left;
-		left = right;
-		right = temp;
+		float temp = right;
+		right = left;
+		left = temp;
 	}
 
 	if(aStraight != straight){
@@ -117,15 +135,35 @@ void Robot::posCompute() {
 
 void Robot::update() {
 	posCompute(); // Update Position Variables
+	float straightOut;
+	float turnOut;
 
 	// State Machine
 	switch(sCurrentState) {
 		case kMoving:
-		arcade(pPosition.compute(euclidean(fX, fY, targetX, targetY)),
-			pAngle.compute(fAngle, atan2(targetY-fY, targetX-fX)));
+		straightOut = fMaxSpeed * pPosition.compute(-1.0f * euclidean(fX, fY, targetX, targetY));
+		turnOut = 3.0f * fMaxSpeed * pAngle.compute(angleClamp(fAngle), angleClamp(atan2(targetY-fY, targetX-fX)));
+		/*
+		Serial.print("Straight: ");
+		Serial.print(straightOut);
+		*/
+		if (euclidean(fX, fY, targetX, targetY) < (2.0f*POS_DEADBAND))
+			turnOut = 0.0f; 
+		if (euclidean(fX, fY, targetX, targetY) < POS_DEADBAND) {
+			setSetAngle(targetAngle);
+		} else
+			arcade(straightOut, turnOut);
 		break;
 		case kTurning:
-		arcade(0.0f, pAngle.compute(fAngle, targetAngle));
+		turnOut = fMaxSpeed*pAngle.compute(fAngle, targetAngle);
+		if(abs(fAngle-targetAngle) > ANGLE_DEADBAND)
+			arcade(0.0f, turnOut);
+		else {
+			sCurrentState = kWaiting;
+		}
+		break;
+		case kWaiting:
+			tank(0.0f, 0.0f);
 		break;
 	}
 }
@@ -134,6 +172,7 @@ void Robot::setSetPosition(float newX, float newY) {
 	if(sCurrentState != kManual) {
 		targetX = newX;
 		targetY = newY;
+		targetAngle = fAngle;
 		sCurrentState = kMoving;
 	}
 }
