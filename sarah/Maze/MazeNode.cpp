@@ -16,13 +16,17 @@
  *
 ******************************************************************************/
 
+
+// when f's are equal, compare h values
+// http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
+
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
 #include "MazeNode.h"
 
 /* Constructor function takes in coordinates (coorX and coorY), a manhattan distance,
-   a start distance, and an array walls of booleans in the order: 
+   and an array walls of booleans in the order: 
    [positiveX, positiveY, negativeX, negativeY] or [Right, Down, Left, Up].
 
    Right now, all arguments are required though in the future, can write 
@@ -32,12 +36,11 @@ void MazeNode::setValues(int coorX, int coorY, int manDist, int startingDist, bo
    assert(coorX >= 0);
    assert(coorY >= 0);
    assert(manDist >= 0);
-   assert(startingDist >= 0);
 
    xCoor = coorX; // horizontal coordinate with zero at left
    yCoor = coorY; // vertical coordinate with zero at top 
    manhattanDist = manDist; // sum of differences of x coordinates and y coordinates from target node
-   startDist = startingDist; // distance (in number of nodes traversed) from start node
+   startDist = startingDist; // shortest distance in number of nodes from start node
 
    walls.posX = newWalls[0];
    walls.posY = newWalls[1];
@@ -58,9 +61,9 @@ int MazeNode::getYCoor() {
    return yCoor;
 }
 
-/* Returns node's score (sum of manhattan and start distances) */
-int MazeNode::getScore() {
-   return manhattanDist + startDist;
+/* Returns node's score (sum of manhattan and number of traversals) */
+double MazeNode::getScore() {
+   return manhattanDist*1.001 + numOfTraversals;
 }
 
 /* Returns Manhattan distance */
@@ -68,8 +71,8 @@ int MazeNode::getManhattanDist() {
    return manhattanDist;
 }
 
-/* Returns distance from starting node */
-int MazeNode::getStartDist() {
+/* Returns starting distance */
+int MazeNode::getManhattanDist() {
    return startDist;
 }
 
@@ -105,12 +108,6 @@ void MazeNode::incrementNumOfTraversals() {
    numOfTraversals++;
 }
 
-/* Change distance in nodes from start node. Should not be able to 
-   change Manhattan Distance. */
-void MazeNode::setStartDist(int dist) {
-   startDist = dist;
-}
-
 /* Marks the node as a part of the solution path */
 void MazeNode::markSolution() {
    solutionNode = true;
@@ -119,6 +116,11 @@ void MazeNode::markSolution() {
 /* Unmarks the node as a part of the solution path */
 void MazeNode::unmarkSolution() {
    solutionNode = false;
+}
+
+/* Changes start distcance */
+void MazeNode::setStartDist(int dist) {
+   startDist = dist;
 }
 
 /* Returns true if node is part of solution, false otherwise */

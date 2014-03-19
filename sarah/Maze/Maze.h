@@ -15,7 +15,7 @@
 #include "MazeNode.h"
 #include <vector>
 
-enum Adjacent {ABOVE = 1, BELOW = 2, RIGHT = 3, LEFT = 4};
+enum Adjacent {ABOVE, BELOW, RIGHT, LEFT};
 
 class Maze {
 
@@ -24,6 +24,8 @@ class Maze {
    int lengthY; // length (vertical length) of maze
    int numTraversed; // number of nodes traversed 
    bool pathFound; // whether or not a successful path has been found
+   enum Adjacent *path;
+   int pathLength;
 
    MazeNode** mazeArray; // an array of MazeNodes to represent rectangular maze
 
@@ -72,7 +74,23 @@ class Maze {
 
    /* Increments number of Nodes traversed */
    void incrementNumOfNodesTraversed();
-   
+
+   /* Changes position of current node */
+   void changeCurrentNode(int x, int y);
+
+   /* Frees memory of nodes */
+   void freeMaze();
+
+   MazeNode *nextNodeAStar();
+
+   enum Adjacent *getPath();
+
+   void addToPath(enum Adjacent val);
+
+
+
+
+
    /* Applies A Star algorithm and returns 1 if successful and 0 if unsuccessful */
    int applyAStarAlgorithm();
 
@@ -80,11 +98,6 @@ class Maze {
       returns 1 if successful and 0 if unsuccessful */
    enum Adjacent *findShortestSolutionPath(enum Adjacent path[], int *size, MazeNode *start, MazeNode *end);
 
-   /* Changes position of current node */
-   void changeCurrentNode(int x, int y);
-
-   /* Frees memory of nodes */
-   void freeMaze();
 };
 
 #endif

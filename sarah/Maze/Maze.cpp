@@ -65,7 +65,7 @@ void Maze::setValues(int lenX, int lenY, int startX, int startY, int targetX, in
    for (int i = 0; i < lengthX; i++) {
       for (int j = 0; j < lengthY; j++) {
          mazeArray[getArrayIndex(i, j, lengthX)] = (MazeNode *) malloc(sizeof(MazeNode));
-         mazeArray[getArrayIndex(i, j, lengthX)]->setValues(i, j, abs(i - targetX) + abs(j - targetY), lengthX + lengthY, w);
+         mazeArray[getArrayIndex(i, j, lengthX)]->setValues(i, j, abs(i - targetX) + abs(j - targetY), abs(i - startX) + abs(j - startY), w);
       }
    }  
 
@@ -79,6 +79,8 @@ void Maze::setValues(int lenX, int lenY, int startX, int startY, int targetX, in
    
    /* whether or not a path has been found */
    pathFound = false;
+   path = (enum Adjacent *) malloc(sizeof(enum Adjacent)*lengthX*lengthY);
+   pathLength = 0;
 }
 
 /* Returns the number of nodes traversed */
@@ -153,12 +155,64 @@ void Maze::freeMaze() {
       }
    }  
 }
+
+enum Adjacent *Maze::getPath(int *length) {
+   *length = pathLength;
+   return path;
+}
+
+void Maze::addToPath(enum Adjacent val) {
+   path[pathLength] = val;
+   pathLength++;
+}
+
+MazeNode *Maze::nextNodeAStar() {
+
+   // set start dist to 0
+   // if start dist is less than current position's start dist, set it's dist to start dist
+   // else change start dist to current position's start dist
+   // examine all viable nodes and if their start dist is less + 1 is less than current start dist, set current start dist to the smallest adjacent start dist + 1
+   // before getting the score of the nodes, examine all viable nodes and set their start dist to 1 greater current start dist if they are currently larger than that 
+
+   // may need to consider if the node has been traversed, but for now, ignore
+   // now examine all viable nodes and go with the next adjacent node with the smallest score; if the scores are equal, look at the manhattan distances and compare those
+   // go to the next node
+   // increment number of nodes traversed
+   // increment start dist
+   // increment path length
+   // add direction to path
+}
+
+
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
    
 /* Applies A Star algorithm and returns 1 if successful and 0 if unsuccessful or
    a path has already been found */
 int Maze::applyAStarAlgorithm() {
    if (this->pathFound) return 0;
-
    MazeNode *next;
 
    for ( ; ; ) {
@@ -180,21 +234,29 @@ int Maze::applyAStarAlgorithm() {
       int x = currentPosition->getXCoor();
       int y = currentPosition->getYCoor();
 
-      if (!currentPosition->rightWall() && !this->edgeOfArray(x, y, RIGHT) && getAdjacentNode(x, y, RIGHT)->getScore() < score) {
-         score = getAdjacentNode(x, y, RIGHT)->getScore();
-         next = getAdjacentNode(x, y, RIGHT);
+      if (!currentPosition->hasWall(RIGHT_W) && !this->edgeOfArray(x, y, RIGHT)) { 
+         if (getAdjacentNode(x, y, RIGHT)->getScore() < score) {
+            score = getAdjacentNode(x, y, RIGHT)->getScore();
+            next = getAdjacentNode(x, y, RIGHT);
+         }
       }
-      if (!currentPosition->leftWall() && !this->edgeOfArray(x, y, LEFT) && getAdjacentNode(x, y, LEFT)->getScore() < score) {
-         score = getAdjacentNode(x, y, LEFT)->getScore();
-         next = getAdjacentNode(x, y, LEFT);
+      if (!currentPosition->hasWall(LEFT_W) && !this->edgeOfArray(x, y, LEFT)) { 
+         if (getAdjacentNode(x, y, LEFT)->getScore() < score) {
+            score = getAdjacentNode(x, y, LEFT)->getScore();
+            next = getAdjacentNode(x, y, LEFT);\
+         }
       }
-      if (!currentPosition->topWall() && !this->edgeOfArray(x, y, ABOVE) && getAdjacentNode(x, y, ABOVE)->getScore() < score) {
-         score = getAdjacentNode(x, y, ABOVE)->getScore();
-         next = getAdjacentNode(x, y, ABOVE);
+      if (!currentPosition->hasWall(ABOVE_W) && !this->edgeOfArray(x, y, ABOVE)) { 
+         if (getAdjacentNode(x, y, ABOVE)->getScore() < score) {
+            score = getAdjacentNode(x, y, ABOVE)->getScore();
+            next = getAdjacentNode(x, y, ABOVE);
+         }
       }
-      if (!currentPosition->bottomWall() && !this->edgeOfArray(x, y, BELOW) && getAdjacentNode(x, y, BELOW)->getScore() < score) {
-         score = getAdjacentNode(x, y, BELOW)->getScore();
-         next = getAdjacentNode(x, y, BELOW);
+      if (!currentPosition->hasWall(BELOW_W) && !this->edgeOfArray(x, y, BELOW)) {
+         if (getAdjacentNode(x, y, BELOW)->getScore() < score) {
+            score = getAdjacentNode(x, y, BELOW)->getScore();
+            next = getAdjacentNode(x, y, BELOW);
+         }
       }
 
       currentPosition = next;
@@ -220,19 +282,19 @@ enum Adjacent* Maze::findShortestSolutionPath(enum Adjacent path[], int *size, M
       int x = tracker->getXCoor();
       int y = tracker->getYCoor();
 
-      if (!tracker->rightWall() && getAdjacentNode(x, y, RIGHT) != prev && !edgeOfArray(x, y, RIGHT) && getAdjacentNode(x, y, RIGHT)->checkSolution()) {
+      if (!tracker->hasWall(RIGHT_W) && getAdjacentNode(x, y, RIGHT) != prev && !edgeOfArray(x, y, RIGHT) && getAdjacentNode(x, y, RIGHT)->checkSolution()) {
          path[i] = RIGHT;
          next = getAdjacentNode(x, y, RIGHT);
       }
-      else if (!tracker->leftWall() && getAdjacentNode(x, y, LEFT) != prev && !edgeOfArray(x, y, LEFT) && getAdjacentNode(x, y, LEFT)->checkSolution()) {
+      else if (!tracker->hasWall(LEFT_W) && getAdjacentNode(x, y, LEFT) != prev && !edgeOfArray(x, y, LEFT) && getAdjacentNode(x, y, LEFT)->checkSolution()) {
          path[i] = LEFT;
          next = getAdjacentNode(x, y, LEFT);
       }
-      else if (!tracker->topWall() && getAdjacentNode(x, y, ABOVE) != prev && !edgeOfArray(x, y, ABOVE) && getAdjacentNode(x, y, ABOVE)->checkSolution()) {
+      else if (!tracker->hasWall(ABOVE_W) && getAdjacentNode(x, y, ABOVE) != prev && !edgeOfArray(x, y, ABOVE) && getAdjacentNode(x, y, ABOVE)->checkSolution()) {
          path[i] = ABOVE;
          next = getAdjacentNode(x, y, ABOVE);
       }
-      else if (!tracker->bottomWall() && getAdjacentNode(x, y, BELOW) != prev && !edgeOfArray(x, y, BELOW) && getAdjacentNode(x, y, BELOW)->checkSolution()) {
+      else if (!tracker->hasWall(BELOW_W) && getAdjacentNode(x, y, BELOW) != prev && !edgeOfArray(x, y, BELOW) && getAdjacentNode(x, y, BELOW)->checkSolution()) {
          path[i] = BELOW;
          next = getAdjacentNode(x, y, BELOW);
       }
