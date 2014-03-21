@@ -16,11 +16,10 @@
  *
 ******************************************************************************/
 
-
-enum Wall {ABOVE_W = 1, BELOW_W = 2, RIGHT_W = 3, LEFT_W = 4};
-
 #ifndef MAZENODE_H
 #define MAZENODE_H
+
+enum Wall {ABOVE_W, BELOW_W, RIGHT_W, LEFT_W};
 
 /* Represents the walls of the node. Could be represented by an array of 
    booleans but a struct is more expressive option. */
@@ -37,23 +36,23 @@ class MazeNode {
     int xCoor; // horizontal coordinate with zero at left
     int yCoor; // vertical coordinate with zero at top 
     int manhattanDist; // sum of differences of x coordinates and y coordinates from target node
-    int startDist; // distance (in number of nodes traversed) from start node
+    int startDist; // shortest distance in number of nodes from start node
     struct NodeWalls walls; // find out if there are any walls around the node
     int numOfTraversals; // number of times node crossed in finding a sucessful path
     bool solutionNode; // true if part of solution path, false otherwise
 
   public:
     /* Constructor function takes in coordinates (coorX and coorY), a manhattan distance,
-      a start distance, and an array walls of booleans in the order: 
+      and an array walls of booleans in the order: 
       [positiveX, positiveY, negativeX, negativeY] or [Right, Down, Left, Up].
       
       Right now, all arguments are required though in the future, can write 
       the class so that walls, for example, if NULL will simply be set so that
       no walls exist 
 
-      Old constructor: MazeNode(int coorX, int coorY, int manDist, int startingDist, bool newWalls[]);
+      Old constructor: MazeNode(int coorX, int coorY, int manDist, bool newWalls[]);
     */
-    void setValues(int coorX, int coorY, int manDist, int startingDist, bool newWalls[]);
+    void setValues(int coorX, int coorY, int manDist, bool newWalls[]);
 
     /* Returns x coordinate */
     int getXCoor();
@@ -61,13 +60,13 @@ class MazeNode {
     /* Returns y coordinate */
     int getYCoor();
 
-    /* Returns node's score (sum of manhattan and start distances) */
-    int getScore();
+    /* Returns node's score (sum of manhattan and number of traversals) */
+    double getScore();
 
     /* Returns Manhattan distance */
     int getManhattanDist();
 
-    /* Returns distance from starting node */
+    /* Returns start distance */
     int getStartDist();
 
     /* Returns number of traversals of this node in finding the path */
@@ -84,10 +83,6 @@ class MazeNode {
        make sense. */
     void incrementNumOfTraversals();
 
-    /* Change distance in nodes from start node. Should not be able to 
-       change Manhattan Distance. */
-    void setStartDist(int dist);
-
     /* Marks the node as a part of the solution path */
     void markSolution();
 
@@ -96,6 +91,9 @@ class MazeNode {
 
     /* Returns true if node is part of solution, false otherwise */
     bool checkSolution();
+
+    /* Changes start distcance */
+    void setStartDist(int dist);
 
 };
 

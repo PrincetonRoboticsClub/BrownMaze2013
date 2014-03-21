@@ -19,20 +19,18 @@ int main(void) {
    printf("TESTING MAZENODE\n");
    bool w[4] = {false, false, false, false};
    MazeNode test1;
-   test1.setValues(0, 0, 0, 0, w);
+   test1.setValues(0, 0, 0, w);
    assert(test1.getXCoor() == 0);
    assert(test1.getYCoor() == 0);
    assert(test1.getScore() == 0);
    assert(test1.getManhattanDist() == 0);
-   assert(test1.getStartDist() == 0);
    assert(test1.getNumOfTraversals() == 0);
-   assert(!test1.rightWall());
-   assert(!test1.bottomWall());
-   assert(!test1.leftWall());
-   assert(!test1.topWall());
+   assert(!test1.hasWall(RIGHT_W));
+   assert(!test1.hasWall(BELOW_W));
+   assert(!test1.hasWall(LEFT_W));
+   assert(!test1.hasWall(ABOVE_W));
    
    test1.incrementNumOfTraversals();
-   test1.setStartDist(5);
    test1.incrementNumOfTraversals();
    w[0] = true;
    w[1] = true;
@@ -40,29 +38,27 @@ int main(void) {
    w[3] = true;
    test1.updateWalls(w);
    
-   assert(test1.getScore() == 5);
+   assert(test1.getScore() == 2);
    assert(test1.getManhattanDist() == 0);
-   assert(test1.getStartDist() == 5);
    assert(test1.getNumOfTraversals() == 2);
-   assert(test1.rightWall());
-   assert(test1.bottomWall());
-   assert(test1.leftWall());
-   assert(test1.topWall());
+   assert(test1.hasWall(RIGHT_W));
+   assert(test1.hasWall(BELOW_W));
+   assert(test1.hasWall(LEFT_W));
+   assert(test1.hasWall(ABOVE_W));
    
    w[1] = false;
    w[3] = false;
    MazeNode test2;
-   test2.setValues(10, 3, 2, 17, w);
+   test2.setValues(10, 3, 2, w);
    assert(test2.getXCoor() == 10);
    assert(test2.getYCoor() == 3);
-   assert(test2.getScore() == 19);
+   assert(test2.getScore() == 2);
    assert(test2.getManhattanDist() == 2);
-   assert(test2.getStartDist() == 17);
    assert(test2.getNumOfTraversals() == 0);
-   assert(test2.rightWall());
-   assert(!test2.bottomWall());
-   assert(test2.leftWall());
-   assert(!test2.topWall());
+   assert(test2.hasWall(RIGHT_W));
+   assert(!test2.hasWall(BELOW_W));
+   assert(test2.hasWall(LEFT_W));
+   assert(!test2.hasWall(ABOVE_W));
    
    /********************************* Maze *********************************/
    printf("-----------------------------------------------------------\n");
@@ -74,10 +70,10 @@ int main(void) {
          assert((*test3.getNode(i, j)).getXCoor() == i);
          assert((*test3.getNode(i, j)).getYCoor() == j);
          assert((*test3.getNode(i, j)).getManhattanDist() == abs(i - 15) + abs(j - 14));
-         assert((*test3.getNode(i, j)).rightWall() == false);
-         assert((*test3.getNode(i, j)).leftWall() == false);
-         assert((*test3.getNode(i, j)).topWall() == false);
-         assert((*test3.getNode(i, j)).bottomWall() == false);
+         assert((*test3.getNode(i, j)).hasWall(RIGHT_W) == false);
+         assert((*test3.getNode(i, j)).hasWall(LEFT_W) == false);
+         assert((*test3.getNode(i, j)).hasWall(ABOVE_W) == false);
+         assert((*test3.getNode(i, j)).hasWall(BELOW_W) == false);
          assert((*test3.getNode(i, j)).getNumOfTraversals() == 0);
          (*test3.getNode(i, j)).incrementNumOfTraversals();
          assert((*test3.getNode(i, j)).getNumOfTraversals() == 1);
@@ -105,39 +101,119 @@ int main(void) {
 
    printf("\nMazeArray's Number of Traversals\n");
    for (int j = 0; j < 15; j++) {
+      printf("\n");
       for (int i = 0; i < 16; i++) {
-         printf("| %d ", (test4.getNode(i, j))->getNumOfTraversals());
+         const char *a;
+         if ((test4.getNode(i, j))->hasWall(ABOVE_W)) a = "  --  ";
+         else a = "      ";
+         printf("%s", a);
       }
-      printf("|\n");
+      printf("\n");
+      for (int i = 0; i < 16; i++) {
+         const char *a, *b;
+         if ((test4.getNode(i, j))->hasWall(LEFT_W)) a = "|";
+         else a = " ";
+         if ((test4.getNode(i, j))->hasWall(RIGHT_W)) b = "|";
+         else b = " ";
+         printf("%s %2d %s", a, (test4.getNode(i, j))->getNumOfTraversals(), b);
+      }
+      printf("\n");
+      for (int i = 0; i < 16; i++) {
+         const char *a;
+         if ((test4.getNode(i, j))->hasWall(BELOW_W)) a = "  --  ";
+         else a = "      ";
+         printf("%s", a);
+      }
+      printf("\n");
    }
 
    printf("\nMazeArray's ManhattanDist\n");
    for (int j = 0; j < 15; j++) {
+      printf("\n");
       for (int i = 0; i < 16; i++) {
-         printf("| %2d ", (test4.getNode(i, j))->getManhattanDist());
+         const char *a;
+         if ((test4.getNode(i, j))->hasWall(ABOVE_W)) a = "  --  ";
+         else a = "      ";
+         printf("%s", a);
       }
-      printf("|\n");
+      printf("\n");
+      for (int i = 0; i < 16; i++) {
+         const char *a, *b;
+         if ((test4.getNode(i, j))->hasWall(LEFT_W)) a = "|";
+         else a = " ";
+         if ((test4.getNode(i, j))->hasWall(RIGHT_W)) b = "|";
+         else b = " ";
+         printf("%s %2d %s", a, (test4.getNode(i, j))->getManhattanDist(), b);
+      }
+      printf("\n");
+      for (int i = 0; i < 16; i++) {
+         const char *a;
+         if ((test4.getNode(i, j))->hasWall(BELOW_W)) a = "  --  ";
+         else a = "      ";
+         printf("%s", a);
+      }
+      printf("\n");
    }
 
    printf("\nMazeArray's Score\n");
    for (int j = 0; j < 15; j++) {
+      printf("\n");
       for (int i = 0; i < 16; i++) {
-         printf("| %2d ", (test4.getNode(i, j))->getScore());
+         const char *a;
+         if ((test4.getNode(i, j))->hasWall(ABOVE_W)) a = "  --  ";
+         else a = "      ";
+         printf("%s", a);
       }
-      printf("|\n");
+      printf("\n");
+      for (int i = 0; i < 16; i++) {
+         const char *a, *b;
+         if ((test4.getNode(i, j))->hasWall(LEFT_W)) a = "|";
+         else a = " ";
+         if ((test4.getNode(i, j))->hasWall(RIGHT_W)) b = "|";
+         else b = " ";
+         printf("%s %2d %s", a, (test4.getNode(i, j))->getScore(), b);
+      }
+      printf("\n");
+      for (int i = 0; i < 16; i++) {
+         const char *a;
+         if ((test4.getNode(i, j))->hasWall(BELOW_W)) a = "  --  ";
+         else a = "      ";
+         printf("%s", a);
+      }
+      printf("\n");
    }
 
    printf("\nMazeArray's Solution Nodes\n");
    for (int j = 0; j < 15; j++) {
+      printf("\n");
       for (int i = 0; i < 16; i++) {
-         printf("| %2d ", (test4.getNode(i, j))->checkSolution());
+         const char *a;
+         if ((test4.getNode(i, j))->hasWall(ABOVE_W)) a = "  --  ";
+         else a = "      ";
+         printf("%s", a);
       }
-      printf("|\n");
+      printf("\n");
+      for (int i = 0; i < 16; i++) {
+         const char *a, *b;
+         if ((test4.getNode(i, j))->hasWall(LEFT_W)) a = "|";
+         else a = " ";
+         if ((test4.getNode(i, j))->hasWall(RIGHT_W)) b = "|";
+         else b = " ";
+         printf("%s %2d %s", a, (test4.getNode(i, j))->checkSolution(), b);
+      }
+      printf("\n");
+      for (int i = 0; i < 16; i++) {
+         const char *a;
+         if ((test4.getNode(i, j))->hasWall(BELOW_W)) a = "  --  ";
+         else a = "      ";
+         printf("%s", a);
+      }
+      printf("\n");
    }
 
    int size = 256;
    enum Adjacent path[size];
-   test4.findShortestSolutionPath(path, &size);
+   test4.findShortestSolutionPath(path, &size, test4.getStartNode(), test4.getTargetNode());
    printf("\n\nSolution path:\n");
    for (int m = 0; m < 35; m++) {
       switch (path[m]) {
