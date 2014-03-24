@@ -5,8 +5,8 @@
 #include <Arduino.h>
 
 // Fudge Factors
-#define ANGLE_DEADBAND 0.03f
-#define POS_DEADBAND 3.0f
+#define ANGLE_DEADBAND 0.01f
+#define POS_DEADBAND 2.0f
 
 /*** Static Functions ***/
 
@@ -14,9 +14,9 @@ float euclidean(float x1, float y1, float x2, float y2) {
 	return sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
 }
 
-float angleClamp(float angle) {
-	while(angle > PI) angle -= 2*PI;
-	while(angle < -PI) angle += 2*PI;
+float angleClamp(float angle, float center) {
+	while(angle > center + PI) angle -= 2*PI;
+	while(angle < center - PI) angle += 2*PI;
 	return angle;
 }
 
@@ -142,15 +142,16 @@ void Robot::update() {
 	switch(sCurrentState) {
 		case kMoving:
 		straightOut = fMaxSpeed * pPosition.compute(-1.0f * euclidean(fX, fY, targetX, targetY));
-		turnOut = 3.0f * fMaxSpeed * pAngle.compute(angleClamp(fAngle), angleClamp(atan2(targetY-fY, targetX-fX)));
+		turnOut = 7.0f * fMaxSpeed * pAngle.compute(angleClamp(fAngle, targetAngle), angleClamp(atan2(targetY-fY, targetX-fX), targetAngle));
 		/*
 		Serial.print("Straight: ");
 		Serial.print(straightOut);
 		*/
 		if (euclidean(fX, fY, targetX, targetY) < (2.0f*POS_DEADBAND))
-			turnOut = 0.0f; 
+			turnOut = fMaxSpeed*pAngle.compute(fAngle, targetAngle);
 		if (euclidean(fX, fY, targetX, targetY) < POS_DEADBAND) {
-			setSetAngle(targetAngle);
+			sCurrentState = kWaiting;
+			fAngle = angleClamp(fAngle, 0.0f);
 		} else
 			arcade(straightOut, turnOut);
 		break;
@@ -160,6 +161,7 @@ void Robot::update() {
 			arcade(0.0f, turnOut);
 		else {
 			sCurrentState = kWaiting;
+			fAngle = angleClamp(fAngle, 0.0f);
 		}
 		break;
 		case kWaiting:

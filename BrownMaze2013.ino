@@ -36,9 +36,50 @@
 /** PID Constants **/
 #define TANK_I_GAIN 0.03
 #define POS_P_GAIN 0.01
-#define ANGLE_P_GAIN 0.09
+#define ANGLE_P_GAIN 0.08
 
 Robot* r;
+int programCount;
+
+
+// Program Sequence
+void programSequence(int progCount) {
+  switch(progCount) {
+    case 0:
+    r->setSetPosition(60.0f, 0.0f);
+    Serial.println("STRAIGHT X");
+    break;
+    case 1:
+    r->setSetAngle(PI * 0.5f);
+    Serial.println("TURN PI/2");
+    break;
+    case 2:
+    r->setSetPosition(60.0f, 60.0f);
+    Serial.println("STRAIGHT Y");
+    break;
+    case 3:
+    r->setSetAngle(PI);
+    Serial.println("TURN PI");
+    break;
+    case 4:
+    r->setSetPosition(0.0f, 60.0f);
+    Serial.println("STRAIGHT -X");
+    break;
+    case 5:
+    r->setSetAngle(PI * 1.5f);
+    Serial.println("TURN 3PI/2");
+    break;
+    case 6:
+    r->setSetPosition(0.0f, 0.0f);
+    break;
+    case 7:
+    r->setSetAngle(0.0f);
+    break;
+    default:
+    // Do Nothing!
+    Serial.println("DONE!");
+  }
+}
 
 void setup() {
   r = new Robot(
@@ -62,16 +103,23 @@ void setup() {
   /* Only Uncomment One of the Below at a Time */
   
   // Move to Point
-  r->setSetPosition(120.0f, 0.0f);
+  //r->setSetPosition(120.0f, 0.0f);
   
   // Turn to Angle
   //r->setSetAngle(PI * 0.5f);
+  
+  // Use Program Sequence Counter
+  programCount = 0;
+  programSequence(programCount);
+  
+  // Start In Manual Mode (Not SetPoints Allowed)
+  //r->manual();
 }
 
 void loop() {
   
-  //r->tank(30.0f, 30.0f);
-  
+  if(r->getState() == kWaiting)
+    programSequence(++programCount);
   /*
   Serial.print("Left: ");
   Serial.print(r->getLeftSpeed());
