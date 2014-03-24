@@ -15,7 +15,7 @@
 #include "MazeNode.h"
 #include <vector>
 
-enum Adjacent {ABOVE, BELOW, RIGHT, LEFT};
+enum Adjacent {UP, DOWN, RIGHT, LEFT};
 
 class Maze {
 
@@ -83,21 +83,12 @@ class Maze {
 
    MazeNode *nextNodeAStar();
 
-   enum Adjacent *getPath();
+   enum Adjacent *getPath(int *length);
 
    void addToPath(enum Adjacent val);
 
-
-
-
-
-   /* Applies A Star algorithm and returns 1 if successful and 0 if unsuccessful */
-   int applyAStarAlgorithm();
-
-   /* Only use after applying an algorithm. Finds the shortest path and 
-      returns 1 if successful and 0 if unsuccessful */
-   enum Adjacent *findShortestSolutionPath(enum Adjacent path[], int *size, MazeNode *start, MazeNode *end);
-
+   /* Applies A Star algorithm */
+   void applyAStarAlgorithm();
 };
 
 #endif

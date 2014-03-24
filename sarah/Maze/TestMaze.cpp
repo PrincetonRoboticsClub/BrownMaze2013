@@ -19,7 +19,7 @@ int main(void) {
    printf("TESTING MAZENODE\n");
    bool w[4] = {false, false, false, false};
    MazeNode test1;
-   test1.setValues(0, 0, 0, w);
+   test1.setValues(0, 0, 0, 0, w);
    assert(test1.getXCoor() == 0);
    assert(test1.getYCoor() == 0);
    assert(test1.getScore() == 0);
@@ -38,7 +38,7 @@ int main(void) {
    w[3] = true;
    test1.updateWalls(w);
    
-   assert(test1.getScore() == 2);
+   assert(test1.getScore() == 0);
    assert(test1.getManhattanDist() == 0);
    assert(test1.getNumOfTraversals() == 2);
    assert(test1.hasWall(RIGHT_W));
@@ -49,10 +49,10 @@ int main(void) {
    w[1] = false;
    w[3] = false;
    MazeNode test2;
-   test2.setValues(10, 3, 2, w);
+   test2.setValues(10, 3, 2, 17, w);
    assert(test2.getXCoor() == 10);
    assert(test2.getYCoor() == 3);
-   assert(test2.getScore() == 2);
+   assert(test2.getScore() == 1.001*2 + 17);
    assert(test2.getManhattanDist() == 2);
    assert(test2.getNumOfTraversals() == 0);
    assert(test2.hasWall(RIGHT_W));
@@ -155,12 +155,12 @@ int main(void) {
       printf("\n");
    }
 
-   printf("\nMazeArray's Score\n");
+   printf("\nMazeArray's StartDist\n");
    for (int j = 0; j < 15; j++) {
       printf("\n");
       for (int i = 0; i < 16; i++) {
          const char *a;
-         if ((test4.getNode(i, j))->hasWall(ABOVE_W)) a = "  --  ";
+         if ((test4.getNode(i, j))->hasWall(ABOVE_W)) a = "  ---  ";
          else a = "      ";
          printf("%s", a);
       }
@@ -171,12 +171,40 @@ int main(void) {
          else a = " ";
          if ((test4.getNode(i, j))->hasWall(RIGHT_W)) b = "|";
          else b = " ";
-         printf("%s %2d %s", a, (test4.getNode(i, j))->getScore(), b);
+         printf("%s %3d %s", a, (test4.getNode(i, j))->getStartDist(), b);
       }
       printf("\n");
       for (int i = 0; i < 16; i++) {
          const char *a;
-         if ((test4.getNode(i, j))->hasWall(BELOW_W)) a = "  --  ";
+         if ((test4.getNode(i, j))->hasWall(BELOW_W)) a = "  ---  ";
+         else a = "      ";
+         printf("%s", a);
+      }
+      printf("\n");
+   }
+
+   printf("\nMazeArray's Score\n");
+   for (int j = 0; j < 15; j++) {
+      printf("\n");
+      for (int i = 0; i < 16; i++) {
+         const char *a;
+         if ((test4.getNode(i, j))->hasWall(ABOVE_W)) a = "  ---  ";
+         else a = "      ";
+         printf("%s", a);
+      }
+      printf("\n");
+      for (int i = 0; i < 16; i++) {
+         const char *a, *b;
+         if ((test4.getNode(i, j))->hasWall(LEFT_W)) a = "|";
+         else a = " ";
+         if ((test4.getNode(i, j))->hasWall(RIGHT_W)) b = "|";
+         else b = " ";
+         printf("%s %3.f %s", a, (test4.getNode(i, j))->getScore(), b);
+      }
+      printf("\n");
+      for (int i = 0; i < 16; i++) {
+         const char *a;
+         if ((test4.getNode(i, j))->hasWall(BELOW_W)) a = "  ---  ";
          else a = "      ";
          printf("%s", a);
       }
@@ -212,15 +240,15 @@ int main(void) {
    }
 
    int size = 256;
-   enum Adjacent path[size];
-   test4.findShortestSolutionPath(path, &size, test4.getStartNode(), test4.getTargetNode());
+   enum Adjacent *path;
+   path = test4.getPath(&size);
    printf("\n\nSolution path:\n");
-   for (int m = 0; m < 35; m++) {
+   for (int m = 0; m < size; m++) {
       switch (path[m]) {
-         case RIGHT: printf("RIGHT "); break;
-         case LEFT: printf("LEFT "); break;
-         case BELOW: printf("DOWN "); break;
-         case ABOVE: printf("UP "); break;
+         case RIGHT: printf("RIGHT\n"); break;
+         case LEFT: printf("LEFT\n"); break;
+         case DOWN: printf("DOWN\n"); break;
+         case UP: printf("UP\n"); break;
       }
    }
    printf("\n");
