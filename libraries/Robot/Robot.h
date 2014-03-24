@@ -28,10 +28,11 @@
  	Encoder* eRight;
 
  	// PID Objects
- 	PID pLeftSpeed;
- 	PID pRightSpeed;
- 	PID pPosition;
- 	PID pAngle;
+ 	PID* pLeftSpeed;
+ 	PID* pRightSpeed;
+ 	PID* pPosition;
+ 	PID* pDriveAngle;
+ 	PID* pAngle;
 
  	// Detect Position and Orientation
  	float fAngle, fX, fY;
@@ -67,6 +68,7 @@
  	float getSpeed();
  	float getLeftSpeed();
  	float getRightSpeed();
+ 	float getAngularSpeed();
 
  	// Getters
  	State getState();
@@ -86,7 +88,7 @@
  	void setSetAngle(float newAngle); // Robot's New Target Angle, changes to Turning Mode
 
  	void manual(); // Changes to Manual Mode
- 	void begin(float fSpeedIGain, float fAnglePGain, float fPositionPGain); // Changes to Non-Manual Mode
+ 	void begin(PID* pLS, PID* pRS, PID* pP, PID* pDA, PID* pA); // Changes to Non-Manual Mode
 
 
  };

@@ -5,7 +5,8 @@
 #include <Arduino.h>
 
 // Fudge Factors
-#define ANGLE_DEADBAND 0.01f
+#define ANGLE_DEADBAND 0.02f
+#define ANGLE_SPD_DEADBAND 0.05f
 #define POS_DEADBAND 2.0f
 
 /*** Static Functions ***/
@@ -21,8 +22,7 @@ float angleClamp(float angle, float center) {
 }
 
 /*** Class Functions ***/
-Robot::Robot(Motor* leftMotor, Motor* rightMotor, Encoder* leftEncoder, Encoder* rightEncoder, float wheelBase, float maxSpeed) :
-	pLeftSpeed(0.0, 0.0, 0.0), pRightSpeed(0.0, 0.0, 0.0), pPosition(0.0, 0.0, 0.0), pAngle(0.0, 0.0, 0.0)
+Robot::Robot(Motor* leftMotor, Motor* rightMotor, Encoder* leftEncoder, Encoder* rightEncoder, float wheelBase, float maxSpeed)
 {
 	mLeft = leftMotor;
 	mRight = rightMotor;
@@ -70,6 +70,9 @@ float Robot::getAngle() {
 float Robot::getSpeed() {
   return (eLeft->getSpeed() + eRight->getSpeed()) * 0.5;
 }
+float Robot::getAngularSpeed() {
+  return (eRight->getSpeed() - eLeft->getSpeed()) / fWheelBase;
+}
 float Robot::getLeftSpeed() {
 	return eLeft->getSpeed();
 }
@@ -95,8 +98,8 @@ Encoder* Robot::getRightEncoder() {
 
 void Robot::tank(float leftSpeed, float rightSpeed) {
 	if(sCurrentState != kManual) {
-		mLeft->writeSpeed(pLeftSpeed.compute(eLeft->getSpeed(), leftSpeed));
-		mRight->writeSpeed(pRightSpeed.compute(eRight->getSpeed(), rightSpeed));
+		mLeft->writeSpeed(pLeftSpeed->compute(eLeft->getSpeed(), leftSpeed));
+		mRight->writeSpeed(pRightSpeed->compute(eRight->getSpeed(), rightSpeed));
 	} // End if
 } // End tank(float, float)
 
@@ -141,14 +144,14 @@ void Robot::update() {
 	// State Machine
 	switch(sCurrentState) {
 		case kMoving:
-		straightOut = fMaxSpeed * pPosition.compute(-1.0f * euclidean(fX, fY, targetX, targetY));
-		turnOut = 7.0f * fMaxSpeed * pAngle.compute(angleClamp(fAngle, targetAngle), angleClamp(atan2(targetY-fY, targetX-fX), targetAngle));
+		straightOut = fMaxSpeed * pPosition->compute(-1.0f * euclidean(fX, fY, targetX, targetY));
+		turnOut = fMaxSpeed * pDriveAngle->compute(angleClamp(fAngle, targetAngle), angleClamp(atan2(targetY-fY, targetX-fX), targetAngle));
 		/*
 		Serial.print("Straight: ");
 		Serial.print(straightOut);
 		*/
 		if (euclidean(fX, fY, targetX, targetY) < (2.0f*POS_DEADBAND))
-			turnOut = fMaxSpeed*pAngle.compute(fAngle, targetAngle);
+			turnOut = fMaxSpeed*pDriveAngle->compute(fAngle, targetAngle);
 		if (euclidean(fX, fY, targetX, targetY) < POS_DEADBAND) {
 			sCurrentState = kWaiting;
 			fAngle = angleClamp(fAngle, 0.0f);
@@ -156,12 +159,18 @@ void Robot::update() {
 			arcade(straightOut, turnOut);
 		break;
 		case kTurning:
-		turnOut = fMaxSpeed*pAngle.compute(fAngle, targetAngle);
-		if(abs(fAngle-targetAngle) > ANGLE_DEADBAND)
-			arcade(0.0f, turnOut);
+		turnOut = fMaxSpeed*pAngle->compute(fAngle, targetAngle);
+		if(abs(fAngle-targetAngle) < ANGLE_DEADBAND) {
+			if(getAngularSpeed() < ANGLE_SPD_DEADBAND) {
+				sCurrentState = kWaiting;
+				fAngle = angleClamp(fAngle, 0.0f);
+			} else {
+				pLeftSpeed->reset();
+				pRightSpeed->reset();
+			}
+		}
 		else {
-			sCurrentState = kWaiting;
-			fAngle = angleClamp(fAngle, 0.0f);
+			arcade(0.0f, turnOut);
 		}
 		break;
 		case kWaiting:
@@ -182,6 +191,7 @@ void Robot::setSetPosition(float newX, float newY) {
 void Robot::setSetAngle(float newAngle) {
 	if(sCurrentState != kManual) {
 		targetAngle = newAngle;
+		fAngle = angleClamp(fAngle, PI);
 		sCurrentState = kTurning;
 	}
 }
@@ -191,12 +201,12 @@ void Robot::manual() {
 	targetX = targetY = targetAngle = 0.0f;
 }
 
-void Robot::begin(float fSpeedIGain, float fAnglePGain, float fPositionPGain) {
-	pLeftSpeed.setConstants(0.0, fSpeedIGain, 0.0);
-	pRightSpeed.setConstants(0.0, fSpeedIGain, 0.0);
-
-	pPosition.setConstants(fPositionPGain, 0.0, 0.0);
-	pAngle.setConstants(fAnglePGain, 0.0, 0.0);
+void Robot::begin(PID* pLS, PID* pRS, PID* pP, PID* pDA, PID* pA) {
+	pLeftSpeed = pLS;
+	pRightSpeed = pRS;
+	pPosition = pP;
+	pDriveAngle = pDA;
+	pAngle = pA;
 
 	sCurrentState = kWaiting;
 }
