@@ -19,6 +19,7 @@
 #ifndef MAZENODE_H
 #define MAZENODE_H
 
+/* Direction of wall */
 enum Wall {ABOVE_W, BELOW_W, RIGHT_W, LEFT_W};
 
 /* Represents the walls of the node. Could be represented by an array of 
@@ -52,7 +53,7 @@ class MazeNode {
 
       Old constructor: MazeNode(int coorX, int coorY, int manDist, bool newWalls[]);
     */
-    void setValues(int coorX, int coorY, int manDist, bool newWalls[]);
+    void setValues(int coorX, int coorY, int manDist, int startingDist, bool newWalls[]);
 
     /* Returns x coordinate */
     int getXCoor();
