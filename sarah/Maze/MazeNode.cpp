@@ -63,7 +63,7 @@ int MazeNode::getYCoor() {
 
 /* Returns node's score (sum of manhattan and number of traversals) */
 double MazeNode::getScore() {
-   return manhattanDist*1.001 + startDist;
+   return manhattanDist*1.001 + startDist + 0.999*numOfTraversals;
 }
 
 /* Returns Manhattan distance */

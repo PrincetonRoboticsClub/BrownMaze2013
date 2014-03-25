@@ -89,6 +89,8 @@ class Maze {
 
    /* Applies A Star algorithm */
    void applyAStarAlgorithm();
+
+   void applyMazeWalls(bool newwalls[16][16][4], int width, int height);
 };
 
 #endif

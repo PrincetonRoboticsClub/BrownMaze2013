@@ -168,92 +168,92 @@ void Maze::addToPath(enum Adjacent val) {
 }
 
 MazeNode *Maze::nextNodeAStar() {
+   // account for whether or not it has been traversed
    if (this->pathFound) return NULL;
    MazeNode *next;
 
+   currentPosition->incrementNumOfTraversals();
+   if (currentPosition->getNumOfTraversals() == 1) {
+      currentPosition->markSolution();
+      numTraversed++;
+   }
+   /* else {
+      currentPosition->unmarkSolution(); 
+   } */
 
-      currentPosition->incrementNumOfTraversals();
-      if (currentPosition->getNumOfTraversals() == 1) {
-         currentPosition->markSolution();
-         numTraversed++;
-      }
-      /* else {
-         currentPosition->unmarkSolution(); 
-      } */
+   if (currentPosition == nodeTarget) {
+      pathFound = true;
+      return NULL;
+   }
 
-      if (currentPosition == nodeTarget) {
-         pathFound = true;
-         return NULL;
-      }
+   enum Adjacent dir;
+   double score = 100000.0;
+   int x = currentPosition->getXCoor();
+   int y = currentPosition->getYCoor();
 
-      enum Adjacent dir;
-      double score = 100000.0;
-      int x = currentPosition->getXCoor();
-      int y = currentPosition->getYCoor();
+   if (!currentPosition->hasWall(RIGHT_W) && !this->edgeOfArray(x, y, RIGHT)) { 
+      if (getAdjacentNode(x, y, RIGHT)->getStartDist() + 1 < currentPosition->getStartDist()) 
+         currentPosition->setStartDist(getAdjacentNode(x, y, RIGHT)->getStartDist() + 1);
+   }
+   if (!currentPosition->hasWall(LEFT_W) && !this->edgeOfArray(x, y, LEFT)) { 
+      if (getAdjacentNode(x, y, LEFT)->getStartDist() + 1 < currentPosition->getStartDist()) 
+         currentPosition->setStartDist(getAdjacentNode(x, y, LEFT)->getStartDist() + 1);
+   }
+   if (!currentPosition->hasWall(ABOVE_W) && !this->edgeOfArray(x, y, UP)) { 
+      if (getAdjacentNode(x, y, UP)->getStartDist() + 1 < currentPosition->getStartDist()) 
+         currentPosition->setStartDist(getAdjacentNode(x, y, UP)->getStartDist() + 1);
+   }
+   if (!currentPosition->hasWall(BELOW_W) && !this->edgeOfArray(x, y, DOWN)) {
+      if (getAdjacentNode(x, y, DOWN)->getStartDist() + 1 < currentPosition->getStartDist()) 
+         currentPosition->setStartDist(getAdjacentNode(x, y, DOWN)->getStartDist() + 1);
+   }
 
-      if (!currentPosition->hasWall(RIGHT_W) && !this->edgeOfArray(x, y, RIGHT)) { 
-         if (getAdjacentNode(x, y, RIGHT)->getStartDist() + 1 < currentPosition->getStartDist()) 
-            currentPosition->setStartDist(getAdjacentNode(x, y, RIGHT)->getStartDist() + 1);
+   if (!currentPosition->hasWall(RIGHT_W) && !this->edgeOfArray(x, y, RIGHT)) {
+      if (currentPosition->getStartDist() + 1 < getAdjacentNode(x, y, RIGHT)->getStartDist()) {
+         getAdjacentNode(x, y, RIGHT)->setStartDist(currentPosition->getStartDist() + 1);
+      } 
+      if (getAdjacentNode(x, y, RIGHT)->getScore() < score || (getAdjacentNode(x, y, RIGHT)->getScore() == score && getAdjacentNode(x, y, RIGHT)->getManhattanDist() < next->getManhattanDist())) {
+         score = getAdjacentNode(x, y, RIGHT)->getScore();
+         next = getAdjacentNode(x, y, RIGHT);
+         dir = RIGHT;
       }
-      if (!currentPosition->hasWall(LEFT_W) && !this->edgeOfArray(x, y, LEFT)) { 
-         if (getAdjacentNode(x, y, LEFT)->getStartDist() + 1 < currentPosition->getStartDist()) 
-            currentPosition->setStartDist(getAdjacentNode(x, y, LEFT)->getStartDist() + 1);
+   }
+   if (!currentPosition->hasWall(LEFT_W) && !this->edgeOfArray(x, y, LEFT)) { 
+      if (currentPosition->getStartDist() + 1 < getAdjacentNode(x, y, LEFT)->getStartDist()) {
+         getAdjacentNode(x, y, LEFT)->setStartDist(currentPosition->getStartDist() + 1);
+      } 
+      if (getAdjacentNode(x, y, LEFT)->getScore() < score || (getAdjacentNode(x, y, LEFT)->getScore() == score && getAdjacentNode(x, y, LEFT)->getManhattanDist() < next->getManhattanDist())) {
+         score = getAdjacentNode(x, y, LEFT)->getScore();
+         next = getAdjacentNode(x, y, LEFT);
+         dir = LEFT;
       }
-      if (!currentPosition->hasWall(ABOVE_W) && !this->edgeOfArray(x, y, UP)) { 
-         if (getAdjacentNode(x, y, UP)->getStartDist() + 1 < currentPosition->getStartDist()) 
-            currentPosition->setStartDist(getAdjacentNode(x, y, UP)->getStartDist() + 1);
+   }
+   if (!currentPosition->hasWall(ABOVE_W) && !this->edgeOfArray(x, y, UP)) { 
+      if (currentPosition->getStartDist() + 1 < getAdjacentNode(x, y, UP)->getStartDist()) {
+         getAdjacentNode(x, y, UP)->setStartDist(currentPosition->getStartDist() + 1);
+      } 
+      if (getAdjacentNode(x, y, UP)->getScore() < score || (getAdjacentNode(x, y, UP)->getScore() == score && getAdjacentNode(x, y, UP)->getManhattanDist() < next->getManhattanDist())) {
+         score = getAdjacentNode(x, y, UP)->getScore();
+         next = getAdjacentNode(x, y, UP);
+         dir = UP;
       }
-      if (!currentPosition->hasWall(BELOW_W) && !this->edgeOfArray(x, y, DOWN)) {
-         if (getAdjacentNode(x, y, DOWN)->getStartDist() + 1 < currentPosition->getStartDist()) 
-            currentPosition->setStartDist(getAdjacentNode(x, y, DOWN)->getStartDist() + 1);
+   }
+   if (!currentPosition->hasWall(BELOW_W) && !this->edgeOfArray(x, y, DOWN)) {
+      if (currentPosition->getStartDist() + 1 < getAdjacentNode(x, y, DOWN)->getStartDist()) {
+         getAdjacentNode(x, y, DOWN)->setStartDist(currentPosition->getStartDist() + 1);
+      } 
+      if (getAdjacentNode(x, y, DOWN)->getScore() < score || (getAdjacentNode(x, y, DOWN)->getScore() == score && getAdjacentNode(x, y, DOWN)->getManhattanDist() < next->getManhattanDist())) {
+         score = getAdjacentNode(x, y, DOWN)->getScore();
+         next = getAdjacentNode(x, y, DOWN);
+         dir = DOWN;
       }
+   }printf("%d %d\n", x, y);
 
-      if (!currentPosition->hasWall(RIGHT_W) && !this->edgeOfArray(x, y, RIGHT)) {
-         if (currentPosition->getStartDist() + 1 < getAdjacentNode(x, y, RIGHT)->getStartDist()) {
-            getAdjacentNode(x, y, RIGHT)->setStartDist(currentPosition->getStartDist() + 1);
-         } 
-         if (getAdjacentNode(x, y, RIGHT)->getScore() < score || (getAdjacentNode(x, y, RIGHT)->getScore() == score && getAdjacentNode(x, y, RIGHT)->getManhattanDist() < next->getManhattanDist())) {
-            score = getAdjacentNode(x, y, RIGHT)->getScore();
-            next = getAdjacentNode(x, y, RIGHT);
-            dir = RIGHT;
-         }
-      }
-      if (!currentPosition->hasWall(LEFT_W) && !this->edgeOfArray(x, y, LEFT)) { 
-         if (currentPosition->getStartDist() + 1 < getAdjacentNode(x, y, LEFT)->getStartDist()) {
-            getAdjacentNode(x, y, LEFT)->setStartDist(currentPosition->getStartDist() + 1);
-         } 
-         if (getAdjacentNode(x, y, LEFT)->getScore() < score || (getAdjacentNode(x, y, LEFT)->getScore() == score && getAdjacentNode(x, y, LEFT)->getManhattanDist() < next->getManhattanDist())) {
-            score = getAdjacentNode(x, y, LEFT)->getScore();
-            next = getAdjacentNode(x, y, LEFT);
-            dir = LEFT;
-         }
-      }
-      if (!currentPosition->hasWall(ABOVE_W) && !this->edgeOfArray(x, y, UP)) { 
-         if (currentPosition->getStartDist() + 1 < getAdjacentNode(x, y, UP)->getStartDist()) {
-            getAdjacentNode(x, y, UP)->setStartDist(currentPosition->getStartDist() + 1);
-         } 
-         if (getAdjacentNode(x, y, UP)->getScore() < score || (getAdjacentNode(x, y, UP)->getScore() == score && getAdjacentNode(x, y, UP)->getManhattanDist() < next->getManhattanDist())) {
-            score = getAdjacentNode(x, y, UP)->getScore();
-            next = getAdjacentNode(x, y, UP);
-            dir = UP;
-         }
-      }
-      if (!currentPosition->hasWall(BELOW_W) && !this->edgeOfArray(x, y, DOWN)) {
-         if (currentPosition->getStartDist() + 1 < getAdjacentNode(x, y, DOWN)->getStartDist()) {
-            getAdjacentNode(x, y, DOWN)->setStartDist(currentPosition->getStartDist() + 1);
-         } 
-         if (getAdjacentNode(x, y, DOWN)->getScore() < score || (getAdjacentNode(x, y, DOWN)->getScore() == score && getAdjacentNode(x, y, DOWN)->getManhattanDist() < next->getManhattanDist())) {
-            score = getAdjacentNode(x, y, DOWN)->getScore();
-            next = getAdjacentNode(x, y, DOWN);
-            dir = DOWN;
-         }
-      }
+   currentPosition = next;
+   path[pathLength] = dir;
+   pathLength++;
 
-      currentPosition = next;
-      path[pathLength] = dir;
-      pathLength++;
-
-      return currentPosition;
+   return currentPosition;
 }
  
 /* Applies A Star algorithm */
@@ -262,6 +262,15 @@ void Maze::applyAStarAlgorithm() {
       if (pathFound) return;
       nextNodeAStar();
    }
+   return;
 }
 
+void Maze::applyMazeWalls(bool newwalls[][16][4], int width, int height) {
+   for (int i = 0; i < width; i++) {
+      for (int j = 0; j < height; j++) {
+         getNode(i, j)->updateWalls(newwalls[j][i]);
+      }
+   }
+   return;
+} 
 
