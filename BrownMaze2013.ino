@@ -112,14 +112,14 @@ void setup() {
   /* Only Uncomment One of the Below at a Time */
 
   // Move to Point
-  //r->setSetPosition(120.0f, 0.0f);
+  r->setSetPosition(120.0f, 0.0f);
 
   // Turn to Angle
   //r->setSetAngle(PI);
 
   // Use Program Sequence Counter
-  programCount = 0;
-  programSequence(programCount);
+  //programCount = 0;
+  //programSequence(programCount);
 
   // Start In Manual Mode (Not SetPoints Allowed)
   //r->manual();
@@ -127,8 +127,8 @@ void setup() {
 
 void loop() {
   
-  if(r->getState() == kWaiting)
-    programSequence(++programCount);
+  //if(r->getState() == kWaiting)
+    //programSequence(++programCount);
   /*
   Serial.print("Left: ");
    Serial.print(r->getLeftSpeed());

@@ -145,12 +145,13 @@ void Robot::update() {
 	switch(sCurrentState) {
 		case kMoving:
 		straightOut = fMaxSpeed * pPosition->compute(-1.0f * euclidean(fX, fY, targetX, targetY));
+		//turnOut = fMaxSpeed * pDriveAngle->compute(angleClamp(fAngle, targetAngle), angleClamp(atan2((targetY-fY) * (1.0f+0.1f*cos(targetAngle)), (targetX-fX) * (1.0f+0.1f*sin(targetAngle))), targetAngle));
 		turnOut = fMaxSpeed * pDriveAngle->compute(angleClamp(fAngle, targetAngle), angleClamp(atan2(targetY-fY, targetX-fX), targetAngle));
 		/*
 		Serial.print("Straight: ");
 		Serial.print(straightOut);
 		*/
-		if (euclidean(fX, fY, targetX, targetY) < (2.0f*POS_DEADBAND))
+		if (euclidean(fX, fY, targetX, targetY) < (1.5f*POS_DEADBAND))
 			turnOut = fMaxSpeed*pDriveAngle->compute(fAngle, targetAngle);
 		if (euclidean(fX, fY, targetX, targetY) < POS_DEADBAND) {
 			sCurrentState = kWaiting;
