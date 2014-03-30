@@ -34,12 +34,13 @@
 #define TIMEOUT 10000
 
 /** PID Constants **/
-#define TANK_I_GAIN 0.03
-#define POS_P_GAIN 0.01
+#define TANK_I_GAIN 0.06 // 0.03
+#define POS_P_GAIN 0.02 // 0.01, 0.2
 #define ANGLE_P_GAIN 0.095
+#define ANGLE_I_GAIN 0.00
 #define ANGLE_D_GAIN 0.02
-#define DANGLE_P_GAIN 0.4
-#define DANGLE_D_GAIN 0.1
+#define DANGLE_P_GAIN 0.5 // 0.4, 0.5
+#define DANGLE_D_GAIN 0.1 // 0.1
 
 Robot* r;
 int programCount;
@@ -106,20 +107,23 @@ void setup() {
   new PID(0.0, TANK_I_GAIN, 0.0), // Right I Controller
   new PID(POS_P_GAIN, 0.0, 0.0), // Speed P Controller
   new PID(DANGLE_P_GAIN, 0.0, DANGLE_D_GAIN), // Drive Angle PD Controller
-  new PID(ANGLE_P_GAIN, 0.0, ANGLE_D_GAIN) // Angle P Controller
+  new PID(ANGLE_P_GAIN, ANGLE_I_GAIN, ANGLE_D_GAIN) // Angle PID Controller
   );
 
   /* Only Uncomment One of the Below at a Time */
 
   // Move to Point
-  //r->setSetPosition(120.0f, 0.0f);
+  r->setSetPosition(50.0f, 0.0f);
+
+  // this value is about what I measured for 1 tile...
+  //r->setSetPosition(2100.0*2*PI*WHEEL_RADIUS/COUNT_PER_REV, 0.0f);
 
   // Turn to Angle
   //r->setSetAngle(PI);
 
   // Use Program Sequence Counter
-  programCount = 0;
-  programSequence(programCount);
+  //programCount = 0;
+  //programSequence(programCount);
 
   // Start In Manual Mode (Not SetPoints Allowed)
   //r->manual();
@@ -127,21 +131,21 @@ void setup() {
 
 void loop() {
   
-  if(r->getState() == kWaiting)
-    programSequence(++programCount);
+  //if(r->getState() == kWaiting)
+    //programSequence(++programCount);
   /*
   Serial.print("Left: ");
    Serial.print(r->getLeftSpeed());
    Serial.print("; Right: ");
    Serial.println(r->getRightSpeed());
    */
+
   Serial.print("Angle: ");
   Serial.print(r->getAngle());
   Serial.print("; X: ");
   Serial.print(r->getX());
   Serial.print("; Y: ");
   Serial.println(r->getY());
-
 
   r->update();
 }
