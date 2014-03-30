@@ -182,23 +182,19 @@ enum Direction *Maze::getAStarSolutionPath(int *length) {
       int x = tracker->getXCoor();
       int y = tracker->getYCoor();
  
-      if (this->canTravel(x, y, RIGHT)) {
-         if (getDirectionNode(x, y, RIGHT)->getStartDist() == i) 
+      if (this->canTravel(x, y, RIGHT) && (getDirectionNode(x, y, RIGHT)->getStartDist() == i)) {
          val = LEFT;
          tracker = getDirectionNode(x, y, RIGHT);
       }
-      else if (this->canTravel(x, y, LEFT)) {
-         if (getDirectionNode(x, y, LEFT)->getStartDist() == i) 
+      else if (this->canTravel(x, y, LEFT) && (getDirectionNode(x, y, LEFT)->getStartDist() == i)) {
          val = RIGHT;
          tracker = getDirectionNode(x, y, LEFT);
       }
-      else if (this->canTravel(x, y, UP)) { 
-         if (getDirectionNode(x, y, UP)->getStartDist() == i) 
+      else if (this->canTravel(x, y, UP) && (getDirectionNode(x, y, UP)->getStartDist() == i)) {
          val = DOWN;
          tracker = getDirectionNode(x, y, UP);
       }
-      else if (this->canTravel(x, y, DOWN)) {
-         if (getDirectionNode(x, y, DOWN)->getStartDist() == i) 
+      else if (this->canTravel(x, y, DOWN) && (getDirectionNode(x, y, DOWN)->getStartDist() == i)) { 
          val = UP;
          tracker = getDirectionNode(x, y, DOWN);
       }
