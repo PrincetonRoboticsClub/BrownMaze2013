@@ -7,7 +7,8 @@
 // Fudge Factors
 #define ANGLE_DEADBAND 0.02f
 #define ANGLE_SPD_DEADBAND 0.05f
-#define POS_DEADBAND 2.0f
+#define POS_DEADBAND 1.0f // at present this works best if its a function of starting distance
+                          // maybe has (partially) to do with lag created by the I controllers
 
 /*** Static Functions ***/
 
@@ -28,6 +29,10 @@ Robot::Robot(Motor* leftMotor, Motor* rightMotor, Encoder* leftEncoder, Encoder*
 	mRight = rightMotor;
 	eLeft = leftEncoder;
 	eRight = rightEncoder;
+
+	// very important!
+	eLeft->reset();
+	eRight->reset();
 
 	fWheelBase = wheelBase;
 	fMaxSpeed = maxSpeed;
@@ -141,42 +146,52 @@ void Robot::update() {
 	float straightOut;
 	float turnOut;
 
+Serial.println(sCurrentState);
+
 	// State Machine
 	switch(sCurrentState) {
 		case kMoving:
-		straightOut = fMaxSpeed * pPosition->compute(-1.0f * euclidean(fX, fY, targetX, targetY));
-		//turnOut = fMaxSpeed * pDriveAngle->compute(angleClamp(fAngle, targetAngle), angleClamp(atan2((targetY-fY) * (1.0f+0.1f*cos(targetAngle)), (targetX-fX) * (1.0f+0.1f*sin(targetAngle))), targetAngle));
-		turnOut = fMaxSpeed * pDriveAngle->compute(angleClamp(fAngle, targetAngle), angleClamp(atan2(targetY-fY, targetX-fX), targetAngle));
-		/*
-		Serial.print("Straight: ");
-		Serial.print(straightOut);
-		*/
-		if (euclidean(fX, fY, targetX, targetY) < (1.5f*POS_DEADBAND))
-			turnOut = fMaxSpeed*pDriveAngle->compute(fAngle, targetAngle);
-		if (euclidean(fX, fY, targetX, targetY) < POS_DEADBAND) {
-			sCurrentState = kWaiting;
-			fAngle = angleClamp(fAngle, 0.0f);
-		} else
-			arcade(straightOut, turnOut);
-		break;
-		case kTurning:
-		turnOut = fMaxSpeed*pAngle->compute(fAngle, targetAngle);
-		if(abs(fAngle-targetAngle) < ANGLE_DEADBAND) {
-			if(getAngularSpeed() < ANGLE_SPD_DEADBAND) {
+			// @TODO: change PID to not be based off euclidean distance
+			//        or make end condition not based off euclidean distance
+			//        we can make everything faster by making it not euclidean
+			straightOut = fMaxSpeed * pPosition->compute(-1.0f * euclidean(fX, fY, targetX, targetY));
+			//turnOut = fMaxSpeed * pDriveAngle->compute(angleClamp(fAngle, targetAngle), angleClamp(atan2((targetY-fY) * (1.0f+0.1f*cos(targetAngle)), (targetX-fX) * (1.0f+0.1f*sin(targetAngle))), targetAngle));
+			turnOut = fMaxSpeed * pDriveAngle->compute(angleClamp(fAngle, targetAngle), angleClamp(atan2(targetY-fY, targetX-fX), targetAngle));
+			/*
+			Serial.print("Straight: ");
+			Serial.print(straightOut);
+			*/
+			if (euclidean(fX, fY, targetX, targetY) < (1.5f*POS_DEADBAND))
+				turnOut = fMaxSpeed*pDriveAngle->compute(fAngle, targetAngle);
+			if (euclidean(fX, fY, targetX, targetY) < POS_DEADBAND) {
 				sCurrentState = kWaiting;
 				fAngle = angleClamp(fAngle, 0.0f);
-			} else {
-				pLeftSpeed->reset();
-				pRightSpeed->reset();
+			} else
+				arcade(straightOut, turnOut);
+			break;
+		case kTurning:
+			turnOut = fMaxSpeed*pAngle->compute(fAngle, targetAngle);
+			if(abs(fAngle-targetAngle) < ANGLE_DEADBAND) {
+				if(getAngularSpeed() < ANGLE_SPD_DEADBAND) {
+					sCurrentState = kWaiting;
+					fAngle = angleClamp(fAngle, 0.0f);
+				} else {
+					pLeftSpeed->reset();
+					pRightSpeed->reset();
+				}
 			}
-		}
-		else {
-			arcade(0.0f, turnOut);
-		}
-		break;
+			else {
+				arcade(0.0f, turnOut);
+			}
+			break;
 		case kWaiting:
-			tank(0.0f, 0.0f);
-		break;
+			// makes behavior smoother and gets rid of whining noise
+			mLeft->brake();
+			mRight->brake();
+
+			//mLeft->tank(0.0f, 0.0f);
+			//mRight->tank(0.0f, 0.0f);
+			break;
 	}
 }
 
