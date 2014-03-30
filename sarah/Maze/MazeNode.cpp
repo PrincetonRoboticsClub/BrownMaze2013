@@ -63,7 +63,10 @@ int MazeNode::getYCoor() {
 
 /* Returns node's score (sum of manhattan and number of traversals) */
 double MazeNode::getScore() {
-   return manhattanDist*1.001 + startDist + 0.999*numOfTraversals;
+   return manhattanDist+ startDist + 4.000001*numOfTraversals;
+   // 4.001 to get there in fastest time
+   // 2.001 to get there in reasonable time with reasonable short path
+   // 1 to get there with shortest path
 }
 
 /* Returns Manhattan distance */
@@ -82,12 +85,12 @@ int MazeNode::getNumOfTraversals() {
 }
 
 /* Returns whether or not there is a right/positive X wall */
-bool MazeNode::hasWall(enum Wall dir) {
+bool MazeNode::hasWall(enum Direction dir) {
    switch (dir) {
-      case RIGHT_W: return walls.posX;
-      case LEFT_W: return walls.negX;
-      case BELOW_W: return walls.posY;
-      case ABOVE_W: return walls.negY;
+      case RIGHT: return walls.posX;
+      case LEFT: return walls.negX;
+      case DOWN: return walls.posY;
+      case UP: return walls.negY;
       default: assert(false);
    }
    return walls.posX;

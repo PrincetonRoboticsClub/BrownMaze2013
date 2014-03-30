@@ -19,8 +19,7 @@
 #ifndef MAZENODE_H
 #define MAZENODE_H
 
-/* Direction of wall */
-enum Wall {ABOVE_W, BELOW_W, RIGHT_W, LEFT_W};
+enum Direction {UP, DOWN, RIGHT, LEFT};
 
 /* Represents the walls of the node. Could be represented by an array of 
    booleans but a struct is more expressive option. */
@@ -74,7 +73,7 @@ class MazeNode {
     int getNumOfTraversals();
     
     /* Returns whether or not there is a wall in the indicated direction */
-    bool hasWall(enum Wall dir);
+    bool hasWall(enum Direction dir);
 
     /* Update the walls of the node */
     void updateWalls(bool newWalls[]);

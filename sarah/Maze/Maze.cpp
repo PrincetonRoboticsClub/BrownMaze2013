@@ -23,20 +23,28 @@ static int getArrayIndex(int x, int y, int width) {
    return width * x + y;
 }
 
-bool Maze::edgeOfArray(int x, int y, enum Adjacent dir) {
+/* Tests if the node in the direction indicated from the given coordinates can be accessed. 
+   Determine if there is a wall and/or if it is at the edge of the maze. Returns true if
+   can travel in the indicated direction and false otherwise */
+bool Maze::canTravel(int x, int y, enum Direction dir) {
+   // Tests for wall
+   if (getNode(x, y)->hasWall(dir))
+      return false;
+
+   // Tests if it is at the edge of the array
    if (dir == UP) {
-      if (y == 0) return true;
+      if (y == 0) return false;
    }
    else if (dir == DOWN) {
-      if (y == lengthY - 1) return true;
+      if (y == lengthY - 1) return false;
    } 
    else if (dir == RIGHT) {
-      if (x == lengthX - 1) return true;
+      if (x == lengthX - 1) return false;
    }
    else if (dir == LEFT) {
-      if (x == 0) return true;
+      if (x == 0) return false;
    }
-   return false;
+   return true;
 }
 
 /* Maze constructor takes dimensions of a rectangular maze represented
@@ -68,7 +76,6 @@ void Maze::setValues(int lenX, int lenY, int startX, int startY, int targetX, in
          mazeArray[getArrayIndex(i, j, lengthX)]->setValues(i, j, abs(i - targetX) + abs(j - targetY), lengthX*lengthY, w);
       }
    }  
-   getNode(0, 0)->setStartDist(0);
 
    /* pointers to the start, target, and current nodes in the maze array */
    nodeStart = mazeArray[getArrayIndex(startX, startY, lengthX)];
@@ -79,9 +86,11 @@ void Maze::setValues(int lenX, int lenY, int startX, int startY, int targetX, in
    numTraversed = 0;
    
    /* whether or not a path has been found */
-   pathFound = false;
-   path = (enum Adjacent *) malloc(sizeof(enum Adjacent)*lengthX*lengthY);
-   pathLength = 0;
+   solutionFound = false;
+   path = (enum Direction *) malloc(sizeof(enum Direction)*lengthX*lengthY);
+   pathLength = 0; // length of path which IS NOT the number of nodes in the path (always 1 less than number of nodes in path)
+
+   nodeStart->setStartDist(0);
 }
 
 /* Returns the number of nodes traversed */
@@ -125,7 +134,7 @@ MazeNode *Maze::getNode(int x, int y) {
 }
 
 /* Returns pointer adjacent node as indicated by dir to the specified coordinates */
-MazeNode *Maze::getAdjacentNode(int x, int y, enum Adjacent dir) {
+MazeNode *Maze::getDirectionNode(int x, int y, enum Direction dir) {
    if (dir == UP)
       return mazeArray[getArrayIndex(x, y-1, lengthX)];
    else if (dir == DOWN)
@@ -157,19 +166,96 @@ void Maze::freeMaze() {
    }  
 }
 
-enum Adjacent *Maze::getPath(int *length) {
+/* Should only be called after A Star has been applied */
+enum Direction *Maze::getAStarSolutionPath(int *length) {
+   if (pathLength > 0) {
+      *length = pathLength;
+      return path;
+   }
+
+   enum Direction val;
+   MazeNode *tracker = nodeTarget;
+   pathLength = nodeTarget->getStartDist();
    *length = pathLength;
-   return path;
+
+   for (int i = pathLength - 1; i >= 0; i--) {
+      int x = tracker->getXCoor();
+      int y = tracker->getYCoor();
+ 
+      if (this->canTravel(x, y, RIGHT)) {
+         if (getDirectionNode(x, y, RIGHT)->getStartDist() == i) 
+         val = LEFT;
+         tracker = getDirectionNode(x, y, RIGHT);
+      }
+      else if (this->canTravel(x, y, LEFT)) {
+         if (getDirectionNode(x, y, LEFT)->getStartDist() == i) 
+         val = RIGHT;
+         tracker = getDirectionNode(x, y, LEFT);
+      }
+      else if (this->canTravel(x, y, UP)) { 
+         if (getDirectionNode(x, y, UP)->getStartDist() == i) 
+         val = DOWN;
+         tracker = getDirectionNode(x, y, UP);
+      }
+      else if (this->canTravel(x, y, DOWN)) {
+         if (getDirectionNode(x, y, DOWN)->getStartDist() == i) 
+         val = UP;
+         tracker = getDirectionNode(x, y, DOWN);
+      }
+      path[i] = val;
+   }
+
+   return path; 
 }
 
-void Maze::addToPath(enum Adjacent val) {
-   path[pathLength] = val;
-   pathLength++;
+void Maze::updateStartDistances(int x, int y) {
+
+   // when changing start distance, change start distance continuously for adjacent nodes (only if the node that's updating the ones around it
+   // has already been seen though, otherwise could be not actually accessible) until it reaches a point where the start distance is greater than the current start distance
+   // the current flaw in this code versus a star is that the start distance is not computer completely accurately
+
+   if (this->canTravel(x, y, RIGHT)) { 
+      if (getDirectionNode(x, y, RIGHT)->getStartDist() + 1 < currentPosition->getStartDist()) 
+         currentPosition->setStartDist(getDirectionNode(x, y, RIGHT)->getStartDist() + 1);
+   }
+   if (this->canTravel(x, y, LEFT)) { 
+      if (getDirectionNode(x, y, LEFT)->getStartDist() + 1 < currentPosition->getStartDist()) 
+         currentPosition->setStartDist(getDirectionNode(x, y, LEFT)->getStartDist() + 1);
+   }
+   if (this->canTravel(x, y, UP)) { 
+      if (getDirectionNode(x, y, UP)->getStartDist() + 1 < currentPosition->getStartDist()) 
+         currentPosition->setStartDist(getDirectionNode(x, y, UP)->getStartDist() + 1);
+   }
+   if (this->canTravel(x, y, DOWN)) {
+      if (getDirectionNode(x, y, DOWN)->getStartDist() + 1 < currentPosition->getStartDist()) 
+         currentPosition->setStartDist(getDirectionNode(x, y, DOWN)->getStartDist() + 1);
+   }
+
+   if (this->canTravel(x, y, RIGHT)) {
+      if (currentPosition->getStartDist() + 1 < getDirectionNode(x, y, RIGHT)->getStartDist()) {
+         getDirectionNode(x, y, RIGHT)->setStartDist(currentPosition->getStartDist() + 1);
+      } 
+   }
+   if (this->canTravel(x, y, LEFT)) { 
+      if (currentPosition->getStartDist() + 1 < getDirectionNode(x, y, LEFT)->getStartDist()) {
+         getDirectionNode(x, y, LEFT)->setStartDist(currentPosition->getStartDist() + 1);
+      } 
+   }
+   if (this->canTravel(x, y, UP)) { 
+      if (currentPosition->getStartDist() + 1 < getDirectionNode(x, y, UP)->getStartDist()) {
+         getDirectionNode(x, y, UP)->setStartDist(currentPosition->getStartDist() + 1);
+      } 
+   }
+   if (this->canTravel(x, y, DOWN)) {
+      if (currentPosition->getStartDist() + 1 < getDirectionNode(x, y, DOWN)->getStartDist()) {
+         getDirectionNode(x, y, DOWN)->setStartDist(currentPosition->getStartDist() + 1);
+      } 
+   }
 }
 
 MazeNode *Maze::nextNodeAStar() {
    // account for whether or not it has been traversed
-   if (this->pathFound) return NULL;
+   if (this->solutionFound) return NULL;
    MazeNode *next;
 
    currentPosition->incrementNumOfTraversals();
@@ -177,89 +263,59 @@ MazeNode *Maze::nextNodeAStar() {
       currentPosition->markSolution();
       numTraversed++;
    }
-   /* else {
-      currentPosition->unmarkSolution(); 
-   } */
 
    if (currentPosition == nodeTarget) {
-      pathFound = true;
+      solutionFound = true;
       return NULL;
    }
 
-   enum Adjacent dir;
    double score = 100000.0;
    int x = currentPosition->getXCoor();
    int y = currentPosition->getYCoor();
 
-   if (!currentPosition->hasWall(RIGHT_W) && !this->edgeOfArray(x, y, RIGHT)) { 
-      if (getAdjacentNode(x, y, RIGHT)->getStartDist() + 1 < currentPosition->getStartDist()) 
-         currentPosition->setStartDist(getAdjacentNode(x, y, RIGHT)->getStartDist() + 1);
-   }
-   if (!currentPosition->hasWall(LEFT_W) && !this->edgeOfArray(x, y, LEFT)) { 
-      if (getAdjacentNode(x, y, LEFT)->getStartDist() + 1 < currentPosition->getStartDist()) 
-         currentPosition->setStartDist(getAdjacentNode(x, y, LEFT)->getStartDist() + 1);
-   }
-   if (!currentPosition->hasWall(ABOVE_W) && !this->edgeOfArray(x, y, UP)) { 
-      if (getAdjacentNode(x, y, UP)->getStartDist() + 1 < currentPosition->getStartDist()) 
-         currentPosition->setStartDist(getAdjacentNode(x, y, UP)->getStartDist() + 1);
-   }
-   if (!currentPosition->hasWall(BELOW_W) && !this->edgeOfArray(x, y, DOWN)) {
-      if (getAdjacentNode(x, y, DOWN)->getStartDist() + 1 < currentPosition->getStartDist()) 
-         currentPosition->setStartDist(getAdjacentNode(x, y, DOWN)->getStartDist() + 1);
-   }
+   updateStartDistances(x, y);
 
-   if (!currentPosition->hasWall(RIGHT_W) && !this->edgeOfArray(x, y, RIGHT)) {
-      if (currentPosition->getStartDist() + 1 < getAdjacentNode(x, y, RIGHT)->getStartDist()) {
-         getAdjacentNode(x, y, RIGHT)->setStartDist(currentPosition->getStartDist() + 1);
-      } 
-      if (getAdjacentNode(x, y, RIGHT)->getScore() < score || (getAdjacentNode(x, y, RIGHT)->getScore() == score && getAdjacentNode(x, y, RIGHT)->getManhattanDist() < next->getManhattanDist())) {
-         score = getAdjacentNode(x, y, RIGHT)->getScore();
-         next = getAdjacentNode(x, y, RIGHT);
-         dir = RIGHT;
+
+   if (this->canTravel(x, y, RIGHT)) {
+      if (hasBetterScore(RIGHT, x, y, score, next)) {
+         score = getDirectionNode(x, y, RIGHT)->getScore();
+         next = getDirectionNode(x, y, RIGHT);
       }
    }
-   if (!currentPosition->hasWall(LEFT_W) && !this->edgeOfArray(x, y, LEFT)) { 
-      if (currentPosition->getStartDist() + 1 < getAdjacentNode(x, y, LEFT)->getStartDist()) {
-         getAdjacentNode(x, y, LEFT)->setStartDist(currentPosition->getStartDist() + 1);
-      } 
-      if (getAdjacentNode(x, y, LEFT)->getScore() < score || (getAdjacentNode(x, y, LEFT)->getScore() == score && getAdjacentNode(x, y, LEFT)->getManhattanDist() < next->getManhattanDist())) {
-         score = getAdjacentNode(x, y, LEFT)->getScore();
-         next = getAdjacentNode(x, y, LEFT);
-         dir = LEFT;
+   if (this->canTravel(x, y, LEFT)) { 
+      if (hasBetterScore(LEFT, x, y, score, next)) {
+         score = getDirectionNode(x, y, LEFT)->getScore();
+         next = getDirectionNode(x, y, LEFT);
       }
    }
-   if (!currentPosition->hasWall(ABOVE_W) && !this->edgeOfArray(x, y, UP)) { 
-      if (currentPosition->getStartDist() + 1 < getAdjacentNode(x, y, UP)->getStartDist()) {
-         getAdjacentNode(x, y, UP)->setStartDist(currentPosition->getStartDist() + 1);
-      } 
-      if (getAdjacentNode(x, y, UP)->getScore() < score || (getAdjacentNode(x, y, UP)->getScore() == score && getAdjacentNode(x, y, UP)->getManhattanDist() < next->getManhattanDist())) {
-         score = getAdjacentNode(x, y, UP)->getScore();
-         next = getAdjacentNode(x, y, UP);
-         dir = UP;
+   if (this->canTravel(x, y, UP)) { 
+      if (hasBetterScore(UP, x, y, score, next)) {
+         score = getDirectionNode(x, y, UP)->getScore();
+         next = getDirectionNode(x, y, UP);
       }
    }
-   if (!currentPosition->hasWall(BELOW_W) && !this->edgeOfArray(x, y, DOWN)) {
-      if (currentPosition->getStartDist() + 1 < getAdjacentNode(x, y, DOWN)->getStartDist()) {
-         getAdjacentNode(x, y, DOWN)->setStartDist(currentPosition->getStartDist() + 1);
-      } 
-      if (getAdjacentNode(x, y, DOWN)->getScore() < score || (getAdjacentNode(x, y, DOWN)->getScore() == score && getAdjacentNode(x, y, DOWN)->getManhattanDist() < next->getManhattanDist())) {
-         score = getAdjacentNode(x, y, DOWN)->getScore();
-         next = getAdjacentNode(x, y, DOWN);
-         dir = DOWN;
+   if (this->canTravel(x, y, DOWN)) {
+      if (hasBetterScore(DOWN, x, y, score, next)) {
+         score = getDirectionNode(x, y, DOWN)->getScore();
+         next = getDirectionNode(x, y, DOWN);
       }
-   }printf("%d %d\n", x, y);
+   }
 
    currentPosition = next;
-   path[pathLength] = dir;
-   pathLength++;
-
    return currentPosition;
+}
+
+bool Maze::hasBetterScore(enum Direction dir, int x, int y, int score, MazeNode *next) {
+   if (getDirectionNode(x, y, dir)->getScore() < score || 
+      (getDirectionNode(x, y, dir)->getScore() == score 
+         && getDirectionNode(x, y, dir)->getManhattanDist() < next->getManhattanDist()))
+      return true;
 }
  
 /* Applies A Star algorithm */
 void Maze::applyAStarAlgorithm() {
    for (; ;) {
-      if (pathFound) return;
+      if (solutionFound) return;
       nextNodeAStar();
    }
    return;
@@ -274,3 +330,5 @@ void Maze::applyMazeWalls(bool newwalls[][16][4], int width, int height) {
    return;
 } 
 
+
+// when it makes a tradeoff that it does not explore, put it on a priority queue

@@ -15,16 +15,14 @@
 #include "MazeNode.h"
 #include <vector>
 
-enum Adjacent {UP, DOWN, RIGHT, LEFT};
-
 class Maze {
 
   private:
    int lengthX; // width (horizontal length) of maze
    int lengthY; // length (vertical length) of maze
    int numTraversed; // number of nodes traversed 
-   bool pathFound; // whether or not a successful path has been found
-   enum Adjacent *path;
+   bool solutionFound; // whether or not a successful path has been found
+   enum Direction *path;
    int pathLength;
 
    MazeNode** mazeArray; // an array of MazeNodes to represent rectangular maze
@@ -68,9 +66,9 @@ class Maze {
    MazeNode *getNode(int x, int y);
 
    /* Returns pointer adjacent node as indicated by dir to the specified coordinates */
-   MazeNode *getAdjacentNode(int x, int y, enum Adjacent dir);
+   MazeNode *getDirectionNode(int x, int y, enum Direction dir);
 
-   bool edgeOfArray(int x, int y, enum Adjacent dir);
+   bool canTravel(int x, int y, enum Direction dir);
 
    /* Increments number of Nodes traversed */
    void incrementNumOfNodesTraversed();
@@ -83,14 +81,16 @@ class Maze {
 
    MazeNode *nextNodeAStar();
 
-   enum Adjacent *getPath(int *length);
-
-   void addToPath(enum Adjacent val);
+   enum Direction *getAStarSolutionPath(int *length);
 
    /* Applies A Star algorithm */
    void applyAStarAlgorithm();
 
    void applyMazeWalls(bool newwalls[16][16][4], int width, int height);
+
+   void updateStartDistances(int x, int y);
+
+   bool hasBetterScore(enum Direction dir, int x, int y, int score, MazeNode *next);
 };
 
 #endif
