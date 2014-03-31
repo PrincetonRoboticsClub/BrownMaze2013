@@ -174,8 +174,32 @@ int main(void) {
       }
    }
 
-   test5.setValues(width, height, 0, 15, 7, 7);
+   test5.setValues(width, height, 0, 15, 7.5, 7.5);
 
+// 7 7
+// 66
+// Number of nodes traversed: 230
+// Number of traversals: 1186
+
+//    88
+//    66
+//    Number of nodes traversed: 129
+// Number of traversals: 200
+
+// 7.5 7.5
+//    66
+//    Number of nodes traversed: 139
+// Number of traversals: 218
+
+// 7 8
+//    66
+//    Number of nodes traversed: 137
+// Number of traversals: 219
+
+// 8 7
+//    66
+//    Number of nodes traversed: 224
+// Number of traversals: 1137
 
    test5.applyMazeWalls(g, width, height);
 
@@ -280,8 +304,8 @@ int main(void) {
    for (int j = 0; j < 16; j++) {
       for (int i = 0; i < 16; i++) {
          const char *a;
-         if ((test5.getNode(i, j))->hasWall(UP)) a = " --- ";
-         else a = "     ";
+         if ((test5.getNode(i, j))->hasWall(UP)) a = " ----- ";
+         else a = "       ";
          printf("%s", a);
       }
       printf("\n");
@@ -289,7 +313,7 @@ int main(void) {
          const char *a, *b;
          if ((test5.getNode(i, j))->hasWall(LEFT)) a = "|";
          else a = " ";
-         printf("%s%3.f ", a, (test5.getNode(i, j))->getScore());
+         printf("%s%5.1f ", a, (test5.getNode(i, j))->getScore());
 
          if (i == 15 && (test5.getNode(i, j))->hasWall(RIGHT))
             printf("|");;
@@ -299,9 +323,9 @@ int main(void) {
          for (int i = 0; i < 16; i++) {
             const char *a;
             if ((test5.getNode(i, j))->hasWall(DOWN)) 
-               printf(" --- ");
+               printf(" ----- ");
             else 
-               printf("     ");
+               printf("       ");
          }
          printf("\n");
       }
@@ -357,6 +381,7 @@ int main(void) {
    test5.freeMaze();
 
 
+   // nodes that were not traversed on priority queue
    /******************************** Brain *********************************/
    printf("-----------------------------------------------------------\n");
    printf("TESTING BRAIN\n");

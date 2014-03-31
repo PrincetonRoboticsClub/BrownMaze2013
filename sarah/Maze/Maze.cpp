@@ -259,6 +259,10 @@ MazeNode *Maze::nextNodeAStar() {
    if (this->solutionFound) return NULL;
    MazeNode *next;
 
+   // printf("x: %d, y: %d, startdist: %d, Manhattandist: %.1f, Score: %.1f, Walls: %d %d %d %d\n", 
+   //    currentPosition->getXCoor(), currentPosition->getYCoor(), currentPosition->getStartDist(), 
+   //    currentPosition->getManhattanDist(), currentPosition->getScore(), currentPosition->hasWall(RIGHT), currentPosition->hasWall(DOWN), currentPosition->hasWall(LEFT), currentPosition->hasWall(UP));
+
    currentPosition->incrementNumOfTraversals();
    if (currentPosition->getNumOfTraversals() == 1) {
       currentPosition->markSolution();
