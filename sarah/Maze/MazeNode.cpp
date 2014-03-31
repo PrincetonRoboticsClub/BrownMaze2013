@@ -63,7 +63,7 @@ int MazeNode::getYCoor() {
 
 /* Returns node's score (sum of manhattan and number of traversals) */
 double MazeNode::getScore() {
-   return 0.9999*manhattanDist + 1.0001*startDist + 4.0001*numOfTraversals;
+   return 0.9999*manhattanDist + 1.0001*startDist + 4.0000*numOfTraversals;
    // 4.001 to get there in fastest time
    // 2.001 to get there in reasonable time with reasonable short path
    // 1 to get there with shortest path
