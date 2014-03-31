@@ -28,19 +28,21 @@
 /** Robot Dimenion Definitions (cm or cm/s) **/
 #define WHEEL_RADIUS 2.0f
 #define WHEEL_BASE 10.0f
-#define MAX_SPEED 70.0f
+#define MAX_SPEED 70.0f // 70.0f
 
 #define COUNT_PER_REV 1200
 #define TIMEOUT 10000
 
 /** PID Constants **/
-#define TANK_I_GAIN 0.06 // 0.03
-#define POS_P_GAIN 0.02 // 0.01, 0.2
+#define TANK_I_GAIN 0.03 // 0.03, 0.09
+#define POS_P_GAIN 0.025 // 0.01, 0.05
 #define ANGLE_P_GAIN 0.095
-#define ANGLE_I_GAIN 0.00
+#define ANGLE_I_GAIN 0.01
 #define ANGLE_D_GAIN 0.02
-#define DANGLE_P_GAIN 0.5 // 0.4, 0.5
-#define DANGLE_D_GAIN 0.1 // 0.1
+#define DANGLE_P_GAIN 0.9 // 0.4, 0.7
+#define DANGLE_D_GAIN 0.7 // 0.1, 0.3
+
+#define TILE_LENGTH 22.0f
 
 Robot* r;
 int programCount;
@@ -50,7 +52,7 @@ int programCount;
 void programSequence(int progCount) {
   switch(progCount) {
   case 0:
-    r->setSetPosition(60.0f, 0.0f);
+    r->setSetPosition(TILE_LENGTH, 0.0f);
     Serial.println("STRAIGHT X");
     break;
   case 1:
@@ -58,7 +60,7 @@ void programSequence(int progCount) {
     Serial.println("TURN PI/2");
     break;
   case 2:
-    r->setSetPosition(60.0f, 60.0f);
+    r->setSetPosition(TILE_LENGTH, TILE_LENGTH);
     Serial.println("STRAIGHT Y");
     break;
   case 3:
@@ -66,7 +68,7 @@ void programSequence(int progCount) {
     Serial.println("TURN PI");
     break;
   case 4:
-    r->setSetPosition(0.0f, 60.0f);
+    r->setSetPosition(0.0f, TILE_LENGTH);
     Serial.println("STRAIGHT -X");
     break;
   case 5:
@@ -85,7 +87,12 @@ void programSequence(int progCount) {
   }
 }
 
+//float fTileLength = 2100.0*2*PI*WHEEL_RADIUS/COUNT_PER_REV; // 21.99
+
 void setup() {
+  // stop switch pin
+  pinMode(13, INPUT_PULLUP);
+
   r = new Robot(
   new Motor(PIN_LA, PIN_LB, PIN_LN, false), 
   new Motor(PIN_RA, PIN_RB, PIN_RN, false),
@@ -113,13 +120,11 @@ void setup() {
   /* Only Uncomment One of the Below at a Time */
 
   // Move to Point
-  r->setSetPosition(50.0f, 0.0f);
-
-  // this value is about what I measured for 1 tile...
-  //r->setSetPosition(2100.0*2*PI*WHEEL_RADIUS/COUNT_PER_REV, 0.0f);
+  //r->setSetPosition(50.0f, 0.0f);
+  r->setSetPosition(TILE_LENGTH, 10.0f);
 
   // Turn to Angle
-  //r->setSetAngle(PI);
+  //r->setSetAngle(PI/2.0);
 
   // Use Program Sequence Counter
   //programCount = 0;
@@ -129,10 +134,22 @@ void setup() {
   //r->manual();
 }
 
+int n = 1;
+
 void loop() {
+
+  while (digitalRead(13)) {
+    n = 1;
+    delay(500);
+    //r->reset();
+  }
   
-  //if(r->getState() == kWaiting)
-    //programSequence(++programCount);
+  /*if(r->getState() == kWaiting) {
+    long t = millis();
+    while (millis() - t < 200) {r->update();}
+    programSequence(++programCount);
+  }*/
+
   /*
   Serial.print("Left: ");
    Serial.print(r->getLeftSpeed());
@@ -140,12 +157,21 @@ void loop() {
    Serial.println(r->getRightSpeed());
    */
 
+   
   Serial.print("Angle: ");
   Serial.print(r->getAngle());
   Serial.print("; X: ");
   Serial.print(r->getX());
   Serial.print("; Y: ");
   Serial.println(r->getY());
+  
+
+  // run in a straight line forever! - square by square
+  /*while (r->getState() != kWaiting) {r->update();}
+  long t = millis();
+  while (millis() - t < 200) {r->update();}
+  r->setSetPosition(n++ * TILE_LENGTH, 0.0f);
+  */
 
   r->update();
 }
