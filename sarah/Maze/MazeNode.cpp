@@ -32,7 +32,7 @@
    Right now, all arguments are required though in the future, can write 
    the class so that walls, for example, if NULL will simply be set so that
    no walls exist */
-void MazeNode::setValues(int coorX, int coorY, int manDist, int startingDist, bool newWalls[]) {
+void MazeNode::setValues(int coorX, int coorY, double manDist, int startingDist, bool newWalls[]) {
    assert(coorX >= 0);
    assert(coorY >= 0);
    assert(manDist >= 0);
@@ -63,14 +63,14 @@ int MazeNode::getYCoor() {
 
 /* Returns node's score (sum of manhattan and number of traversals) */
 double MazeNode::getScore() {
-   return manhattanDist+ startDist + 4.000001*numOfTraversals;
+   return manhattanDist + startDist + 4.0001*numOfTraversals;
    // 4.001 to get there in fastest time
    // 2.001 to get there in reasonable time with reasonable short path
    // 1 to get there with shortest path
 }
 
 /* Returns Manhattan distance */
-int MazeNode::getManhattanDist() {
+double MazeNode::getManhattanDist() {
    return manhattanDist;
 }
 

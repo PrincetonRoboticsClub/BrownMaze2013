@@ -39,7 +39,7 @@ class Maze {
 
       Old constructor: Maze(int lenX, int lenY, int startX, int startY, int targetX, int targetY);
    */
-   void setValues(int lenX, int lenY, int startX, int startY, int targetX, int targetY);
+   void setValues(int lenX, int lenY, int startX, int startY, double targetX, double targetY);
 
    /* Returns the number of nodes traversed */
    int getNumOfNodesTraversed();

@@ -96,232 +96,90 @@ int main(void) {
    assert((*test3.getTargetNode()).getYCoor() == 14);
    test3.freeMaze();
 
-   /*********** TESTING EMPTY MAZE ***********/
-   Maze test4;
-   test4.setValues(16, 15, 0, 0, 7, 7);
-   bool h[] = {1, 0, 1, 1};
-   bool l[] = {0, 0, 1, 1};
-   test4.getNode(0, 0)->updateWalls(h);
-   test4.getNode(1, 0)->updateWalls(l);
-   test4.applyAStarAlgorithm();
 
-   printf("\nMazeArray's Number of Traversals\n\n");
-   for (int j = 0; j < 15; j++) {
-      for (int i = 0; i < 16; i++) {
-         const char *a;
-         if ((test4.getNode(i, j))->hasWall(UP)) a = " -- ";
-         else a = "    ";
-         printf("%s", a);
-      }
-      printf("\n");
-      for (int i = 0; i < 16; i++) {
-         const char *a, *b;
-         if ((test4.getNode(i, j))->hasWall(LEFT)) a = "|";
-         else a = " ";
-         printf("%s%2d ", a, (test4.getNode(i, j))->getNumOfTraversals());
+   /*********** TESTING MAZE ***********/
 
-         if (i == 15 && (test4.getNode(i, j))->hasWall(RIGHT))
-            printf("|");;
-      }
-      printf("\n");
-      if (j == 15) {
-         for (int i = 0; i < 16; i++) {
-            const char *a;
-            if ((test4.getNode(i, j))->hasWall(DOWN)) 
-               printf(" -- ");
-            else 
-               printf("    ");
-         }
-         printf("\n");
-      }
-   }
-
-   printf("\nMazeArray's ManhattanDist\n\n");
-   for (int j = 0; j < 15; j++) {
-      for (int i = 0; i < 16; i++) {
-         const char *a;
-         if ((test4.getNode(i, j))->hasWall(UP)) a = " -- ";
-         else a = "    ";
-         printf("%s", a);
-      }
-      printf("\n");
-      for (int i = 0; i < 16; i++) {
-         const char *a, *b;
-         if ((test4.getNode(i, j))->hasWall(LEFT)) a = "|";
-         else a = " ";
-         printf("%s%2d ", a, (test4.getNode(i, j))->getManhattanDist());
-      }
-      printf("\n");
-      if (j == 15) {
-         for (int i = 0; i < 16; i++) {
-            const char *a;
-            if ((test4.getNode(i, j))->hasWall(DOWN)) 
-               printf(" -- ");
-            else 
-               printf("    ");
-         }
-         printf("\n");
-      }
-   }
-
-   printf("\nMazeArray's StartDist\n\n");
-   for (int j = 0; j < 15; j++) {
-      for (int i = 0; i < 16; i++) {
-         const char *a;
-         if ((test4.getNode(i, j))->hasWall(UP)) a = " --- ";
-         else a = "     ";
-         printf("%s", a);
-      }
-      printf("\n");
-      for (int i = 0; i < 16; i++) {
-         const char *a, *b;
-         if ((test4.getNode(i, j))->hasWall(LEFT)) a = "|";
-         else a = " ";
-         printf("%s%3d ", a, (test4.getNode(i, j))->getStartDist());
-      }
-      printf("\n");
-      if (j == 15) {
-         for (int i = 0; i < 16; i++) {
-            const char *a;
-            if ((test4.getNode(i, j))->hasWall(DOWN)) 
-               printf(" --- ");
-            else 
-               printf("     ");
-         }
-         printf("\n");
-      }
-   }
-
-   printf("\nMazeArray's Score\n\n");
-   for (int j = 0; j < 15; j++) {
-      for (int i = 0; i < 16; i++) {
-         const char *a;
-         if ((test4.getNode(i, j))->hasWall(UP)) a = " --- ";
-         else a = "     ";
-         printf("%s", a);
-      }
-      printf("\n");
-      for (int i = 0; i < 16; i++) {
-         const char *a, *b;
-         if ((test4.getNode(i, j))->hasWall(LEFT)) a = "|";
-         else a = " ";
-         printf("%s%3.f ", a, (test4.getNode(i, j))->getScore());
-      }
-      printf("\n");
-      if (j == 15) {
-         for (int i = 0; i < 16; i++) {
-            const char *a;
-            if ((test4.getNode(i, j))->hasWall(DOWN)) 
-               printf(" --- ");
-            else 
-               printf("     ");
-         }
-         printf("\n");
-      }
-   }
-
-   printf("\nMazeArray's Solution Nodes\n\n");
-   for (int j = 0; j < 15; j++) {
-      for (int i = 0; i < 16; i++) {
-         const char *a;
-         if ((test4.getNode(i, j))->hasWall(UP)) a = " -- ";
-         else a = "    ";
-         printf("%s", a);
-      }
-      printf("\n");
-      for (int i = 0; i < 16; i++) {
-         const char *a, *b;
-         if ((test4.getNode(i, j))->hasWall(LEFT)) a = "|";
-         else a = " ";
-         printf("%s%2d ", a, (test4.getNode(i, j))->checkSolution());
-      }
-      printf("\n");
-      if (j == 15) {
-         for (int i = 0; i < 16; i++) {
-            const char *a;
-            if ((test4.getNode(i, j))->hasWall(DOWN)) 
-               printf(" -- ");
-            else 
-               printf("    ");
-         }
-         printf("\n");
-      }
-   }
-
-   int size = 256;
-   enum Direction *path;
-   path = test4.getAStarSolutionPath(&size);
-   printf("\n\nSolution path:\n");
-   for (int m = 0; m < size; m++) {
-      switch (path[m]) {
-         case RIGHT: printf("RIGHT\n"); break;
-         case LEFT: printf("LEFT\n"); break;
-         case DOWN: printf("DOWN\n"); break;
-         case UP: printf("UP\n"); break;
-      }
-   }
-   printf("\n");
-   test4.freeMaze();
-
-   /*********** TESTING 2013 MAZE ***********/
-   printf("\nTESTING 2013 MAZE\n");
+   printf("\nTESTING MAZE\n");
    Maze test5;
-   test5.setValues(16, 16, 0, 15, 7, 7);
+   int c;
+   int width;
+   int height;
+   bool g[16][16][4];
 
-   bool g[16][16][4] = {
-      {
-         {1,1,0,0},{0,0,1,1},{0,0,0,1},{0,0,0,1},{0,1,0,1},{0,0,0,1},{0,1,0,1},{0,0,0,1},{0,1,0,1},{0,1,0,1},{0,0,0,1},{0,1,0,1},{0,0,0,1},{0,1,0,1},{0,1,0,1},{1,0,0,1}
-      },
-      {
-         {0,0,1,1},{1,0,0,0},{1,0,1,0},{1,0,1,0},{1,1,1,1},{1,0,1,0},{1,1,1,1},{1,0,1,0},{1,0,1,1},{1,0,1,1},{1,0,1,0},{0,0,1,1},{0,1,0,0},{0,1,0,1},{0,1,0,1},{1,0,0,0}
-      },
-      {
-         {1,0,1,0},{1,0,1,0},{1,0,1,0},{1,0,1,0},{1,0,1,1},{1,0,1,0},{1,0,1,1},{1,0,1,0},{1,0,1,0},{1,0,1,0},{1,0,1,0},{0,1,1,0},{0,0,0,1},{0,1,0,1},{0,1,0,1},{1,0,0,0}
-      },
-      {
-         {0,0,1,0},{1,0,0,0},{0,0,1,0},{0,1,0,0},{0,1,0,0},{0,1,0,0},{0,1,0,0},{0,1,0,0},{0,0,0,0},{0,0,0,0},{0,1,0,0},{0,1,0,1},{0,1,0,0},{0,1,0,1},{0,1,0,1},{1,0,0,0}
-      },
-      {
-         {1,0,1,0},{1,0,1,0},{0,0,1,0},{0,1,0,1},{0,1,0,1},{0,1,0,1},{0,1,0,1},{1,1,0,1},{1,1,1,0},{1,1,1,0},{0,1,1,1},{0,1,0,1},{0,1,0,1},{0,1,0,1},{1,1,0,1},{1,0,1,0}
-      },
-      {
-         {0,0,1,0},{1,0,0,0},{1,0,1,0},{0,0,1,1},{0,1,0,1},{1,0,0,1},{0,1,1,1},{0,1,0,1},{0,1,0,1},{0,1,0,1},{0,0,0,1},{0,1,0,1},{1,0,0,1},{0,0,1,1},{0,0,0,1},{1,0,0,0}
-      },
-      {
-         {1,0,1,0},{1,0,1,0},{1,0,1,0},{0,1,1,0},{1,0,0,1},{1,0,1,0},{0,0,1,1},{0,1,0,1},{0,1,0,1},{0,1,0,1},{1,0,0,0},{1,0,1,1},{1,0,1,0},{1,0,1,0},{1,0,1,0},{1,0,1,0}
-      },
-      {
-         {0,0,1,0},{1,0,0,0},{1,0,1,0},{0,0,1,1},{1,1,0,0},{1,0,1,0},{1,0,1,0},{0,0,1,1},{0,0,0,1},{0,1,0,1},{0,1,0,0},{1,0,0,0},{1,0,1,0},{1,0,1,0},{1,0,1,0},{1,0,1,0}
-      },
-      {
-         {1,0,1,0},{1,0,1,0},{1,0,1,0},{0,1,1,0},{1,0,0,1},{0,1,1,0},{1,1,0,0},{0,1,1,0},{1,1,0,0},{0,1,1,1},{0,1,0,1},{1,0,0,0},{0,1,1,0},{0,0,0,0},{1,1,0,0},{1,0,1,0}
-      },
-      {
-         {0,0,1,0},{1,0,0,0},{0,0,1,0},{0,1,0,1},{1,1,0,0},{0,1,1,1},{0,1,0,1},{0,1,0,1},{0,1,0,1},{0,0,0,1},{0,1,0,1},{1,1,0,0},{0,1,1,1},{0,0,0,0},{1,1,0,1},{1,0,1,0}
-      },
-      {
-         {1,0,1,0},{1,0,1,0},{0,0,1,0},{1,1,0,1},{0,0,1,1},{0,1,0,1},{0,1,0,1},{0,1,0,1},{0,0,0,1},{1,1,0,0},{0,0,1,1},{0,1,0,1},{0,1,0,1},{0,1,0,0},{0,1,0,1},{1,1,0,0}
-      },
-      {
-         {0,0,1,0},{1,0,0,0},{0,0,1,0},{1,1,0,1},{1,0,1,0},{0,0,1,1},{0,1,0,1},{0,1,0,1},{0,0,0,0},{1,1,0,1},{1,0,1,0},{0,0,1,1},{0,1,0,1},{0,1,0,1},{0,1,0,1},{1,0,0,1}
-      },
-      {
-         {1,0,1,0},{1,0,1,0},{0,0,1,0},{1,1,0,1},{1,0,1,0},{1,0,1,0},{1,1,1,1},{0,0,1,1},{1,1,0,0},{0,1,1,1},{1,0,0,0},{1,0,1,0},{0,0,1,1},{0,1,0,1},{0,1,0,1},{1,1,0,0}
-      },
-      {
-         {1,0,1,0},{1,0,1,0},{0,0,1,0},{1,1,0,1},{1,0,1,0},{1,0,1,0},{0,0,1,1},{1,1,0,0},{0,1,1,1},{0,1,0,1},{1,0,0,0},{1,0,1,0},{1,0,1,0},{0,0,1,1},{0,1,0,1},{1,0,0,1}
-      },
-      {
-         {1,0,1,0},{1,0,1,0},{0,1,1,0},{0,1,0,1},{0,1,0,0},{0,1,0,0},{0,1,0,0},{0,1,0,1},{0,1,0,1},{0,1,0,1},{0,1,0,0},{1,1,0,0},{0,1,1,0},{1,1,0,0},{0,0,1,1},{1,1,0,0}
-      },
-      {
-         {1,1,1,0},{0,1,1,0},{0,1,0,1},{0,1,0,1},{0,1,0,1},{0,1,0,1},{0,1,0,1},{0,1,0,1},{0,1,0,1},{0,1,0,1},{0,1,0,1},{0,1,0,1},{0,1,0,1},{0,1,0,1},{1,1,0,0},{0,0,1,1}
-      },
-   };
+   scanf("%d\n", &width);
+   scanf("%d\n", &height);
+   
+   int hor = 0;
+   int ver = 0;
+   while ((c = getchar()) != EOF) {
 
-   test5.applyMazeWalls(g, 16, 16);
+      if (c == '\n') {
+         ver++;
+         hor = 0;
+      }
+      else {
+         if (ver % 2 == 0) {
+            if (ver == 0) {
+               if (c == '0') {
+                  g[ver/2][hor][3] = false;
+               }
+               else if (c == '1') {
+                  g[ver/2][hor][3] = true;
+               }
+            }
+            else if (ver == height*2) {
+               if (c == '0')
+                  g[ver/2-1][hor][1] = false;
+               else if (c == '1')
+                  g[ver/2-1][hor][1] = true;
+            }
+            else {
+               if (c == '0') {
+                  g[ver/2][hor][3] = false;
+                  g[ver/2-1][hor][1] = false;
+               }
+               else if (c == '1') {
+                  g[ver/2][hor][3] = true;
+                  g[ver/2-1][hor][1] = true;
+               }
+            }
 
-   test5.applyAStarAlgorithm(); // seg faulting
+         }
+         else {
+            if (hor == 0) {
+               if (c == '0')
+                  g[ver/2][hor][2] = false;
+               else if (c == '1')
+                  g[ver/2][hor][2] = true;
+            }
+            else if (hor == height*2) {
+               if (c == '0')
+                  g[ver/2][hor-1][0] = false;
+               else if (c == '1')
+                  g[ver/2][hor-1][0] = true;
+            }
+            else {
+               if (c == '0') {
+                  g[ver/2][hor][2] = false;
+                  g[ver/2][hor-1][0] = false;
+               }
+               else if (c == '1') {
+                  g[ver/2][hor][2] = true;
+                  g[ver/2][hor-1][0] = true;
+               }
+            }
+         }
+
+      hor++;  
+      }
+   }
+
+   test5.setValues(width, height, 0, 15, 7, 7);
+
+
+   test5.applyMazeWalls(g, width, height);
+
+   test5.applyAStarAlgorithm();
 
    int nums = 0;
    printf("\nMazeArray's Number of Traversals\n\n");
@@ -369,7 +227,10 @@ int main(void) {
          const char *a, *b;
          if ((test5.getNode(i, j))->hasWall(LEFT)) a = "|";
          else a = " ";
-         printf("%s%2d ", a, (test5.getNode(i, j))->getManhattanDist());
+         printf("%s%2.f ", a, (test5.getNode(i, j))->getManhattanDist());
+
+         if (i == 15 && (test5.getNode(i, j))->hasWall(RIGHT))
+            printf("|");;
       }
       printf("\n");
       if (j == 15) {
@@ -398,6 +259,9 @@ int main(void) {
          if ((test5.getNode(i, j))->hasWall(LEFT)) a = "|";
          else a = " ";
          printf("%s%3d ", a, (test5.getNode(i, j))->getStartDist());
+
+         if (i == 15 && (test5.getNode(i, j))->hasWall(RIGHT))
+            printf("|");;
       }
       printf("\n");
       if (j == 15) {
@@ -426,6 +290,9 @@ int main(void) {
          if ((test5.getNode(i, j))->hasWall(LEFT)) a = "|";
          else a = " ";
          printf("%s%3.f ", a, (test5.getNode(i, j))->getScore());
+
+         if (i == 15 && (test5.getNode(i, j))->hasWall(RIGHT))
+            printf("|");;
       }
       printf("\n");
       if (j == 15) {
@@ -454,6 +321,9 @@ int main(void) {
          if ((test5.getNode(i, j))->hasWall(LEFT)) a = "|";
          else a = " ";
          printf("%s%2d ", a, (test5.getNode(i, j))->checkSolution());
+
+         if (i == 15 && (test5.getNode(i, j))->hasWall(RIGHT))
+            printf("|");;
       }
       printf("\n");
       if (j == 15) {
@@ -485,6 +355,7 @@ int main(void) {
    }
    printf("\n"); 
    test5.freeMaze();
+
 
    /******************************** Brain *********************************/
    printf("-----------------------------------------------------------\n");

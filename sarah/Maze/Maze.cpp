@@ -51,7 +51,7 @@ bool Maze::canTravel(int x, int y, enum Direction dir) {
    by an array of MazeNodes startArray, and the coordinates of
    the start node and target node. The nodes are ordered so that the
    origin (0,0) node is in the top left. */
-void Maze::setValues(int lenX, int lenY, int startX, int startY, int targetX, int targetY) {
+void Maze::setValues(int lenX, int lenY, int startX, int startY, double targetX, double targetY) {
    assert(lenX > 0);
    assert(lenY > 0);
    assert(startX >= 0 && startX < lenX);
@@ -73,13 +73,13 @@ void Maze::setValues(int lenX, int lenY, int startX, int startY, int targetX, in
    for (int i = 0; i < lengthX; i++) {
       for (int j = 0; j < lengthY; j++) {
          mazeArray[getArrayIndex(i, j, lengthX)] = (MazeNode *) malloc(sizeof(MazeNode));
-         mazeArray[getArrayIndex(i, j, lengthX)]->setValues(i, j, abs(i - targetX) + abs(j - targetY), lengthX*lengthY, w);
+         mazeArray[getArrayIndex(i, j, lengthX)]->setValues(i, j, fabs(targetX - (float) i) + fabs(targetY - (float) j), lengthX*lengthY, w);
       }
    }  
 
    /* pointers to the start, target, and current nodes in the maze array */
    nodeStart = mazeArray[getArrayIndex(startX, startY, lengthX)];
-   nodeTarget = mazeArray[getArrayIndex(targetX, targetY, lengthX)];
+   nodeTarget = mazeArray[getArrayIndex((int) targetX, (int) targetY, lengthX)];
    currentPosition = nodeStart;
 
    /* number of nodes that have been traversed */
@@ -205,11 +205,9 @@ enum Direction *Maze::getAStarSolutionPath(int *length) {
 }
 
 void Maze::updateStartDistances(int x, int y) {
-
-   // when changing start distance, change start distance continuously for adjacent nodes (only if the node that's updating the ones around it
-   // has already been seen though, otherwise could be not actually accessible) until it reaches a point where the start distance is greater than the current start distance
    // the current flaw in this code versus a star is that the start distance is not computer completely accurately
 
+   // makes sure start distance of current node being considered is as small as possible
    if (this->canTravel(x, y, RIGHT)) { 
       if (getDirectionNode(x, y, RIGHT)->getStartDist() + 1 < currentPosition->getStartDist()) 
          currentPosition->setStartDist(getDirectionNode(x, y, RIGHT)->getStartDist() + 1);
@@ -227,6 +225,13 @@ void Maze::updateStartDistances(int x, int y) {
          currentPosition->setStartDist(getDirectionNode(x, y, DOWN)->getStartDist() + 1);
    }
 
+   // Then branches out to update the start distance of adjacent, reachable nodes, and the nodes that 
+   // are adjacent and reachable to those nodes and so on... ONLY if the node being considered (aka the node
+   // for which we are examining adjacent nodes) has already been visited. If this is not true,
+   // then we may have ended up updating a node for whom the walls had not yet been established, which would
+   // have meant looking at nodes that aren't actually reachable. 
+
+   // only do this until it reaches a node for which start distance is already less than the current start distance + 1
    if (this->canTravel(x, y, RIGHT)) {
       if (currentPosition->getStartDist() + 1 < getDirectionNode(x, y, RIGHT)->getStartDist()) {
          getDirectionNode(x, y, RIGHT)->setStartDist(currentPosition->getStartDist() + 1);
@@ -326,5 +331,3 @@ void Maze::applyMazeWalls(bool newwalls[][16][4], int width, int height) {
    return;
 } 
 
-
-// when it makes a tradeoff that it does not explore, put it on a priority queue

@@ -35,7 +35,7 @@ class MazeNode {
   private:
     int xCoor; // horizontal coordinate with zero at left
     int yCoor; // vertical coordinate with zero at top 
-    int manhattanDist; // sum of differences of x coordinates and y coordinates from target node
+    double manhattanDist; // sum of differences of x coordinates and y coordinates from target node
     int startDist; // shortest distance in number of nodes from start node
     struct NodeWalls walls; // find out if there are any walls around the node
     int numOfTraversals; // number of times node crossed in finding a sucessful path
@@ -52,7 +52,7 @@ class MazeNode {
 
       Old constructor: MazeNode(int coorX, int coorY, int manDist, bool newWalls[]);
     */
-    void setValues(int coorX, int coorY, int manDist, int startingDist, bool newWalls[]);
+    void setValues(int coorX, int coorY, double manDist, int startingDist, bool newWalls[]);
 
     /* Returns x coordinate */
     int getXCoor();
@@ -64,7 +64,7 @@ class MazeNode {
     double getScore();
 
     /* Returns Manhattan distance */
-    int getManhattanDist();
+    double getManhattanDist();
 
     /* Returns start distance */
     int getStartDist();
