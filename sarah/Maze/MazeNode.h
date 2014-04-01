@@ -39,7 +39,6 @@ class MazeNode {
     int startDist; // shortest distance in number of nodes from start node
     struct NodeWalls walls; // find out if there are any walls around the node
     int numOfTraversals; // number of times node crossed in finding a sucessful path
-    bool solutionNode; // true if part of solution path, false otherwise
 
   public:
     /* Constructor function takes in coordinates (coorX and coorY), a manhattan distance,
@@ -83,17 +82,12 @@ class MazeNode {
        make sense. */
     void incrementNumOfTraversals();
 
-    /* Marks the node as a part of the solution path */
-    void markSolution();
-
-    /* Marks the node as a part of the solution path */
-    void unmarkSolution();
-
-    /* Returns true if node is part of solution, false otherwise */
-    bool checkSolution();
-
     /* Changes start distcance */
     void setStartDist(int dist);
+
+    int getNumOfOpenWalls();
+
+    bool shouldTraverse();
 
 };
 

@@ -207,23 +207,32 @@ enum Direction *Maze::getAStarSolutionPath(int *length) {
 void Maze::updateStartDistances(int x, int y) {
    // the current flaw in this code versus a star is that the start distance is not computer completely accurately
 
+   MazeNode *tracker = getNode(x, y);
+
    // makes sure start distance of current node being considered is as small as possible
    if (this->canTravel(x, y, RIGHT)) { 
-      if (getDirectionNode(x, y, RIGHT)->getStartDist() + 1 < currentPosition->getStartDist()) 
-         currentPosition->setStartDist(getDirectionNode(x, y, RIGHT)->getStartDist() + 1);
+      if (getDirectionNode(x, y, RIGHT)->getStartDist() + 1 < tracker->getStartDist()) {
+         tracker->setStartDist(getDirectionNode(x, y, RIGHT)->getStartDist() + 1);
+      }
    }
    if (this->canTravel(x, y, LEFT)) { 
-      if (getDirectionNode(x, y, LEFT)->getStartDist() + 1 < currentPosition->getStartDist()) 
-         currentPosition->setStartDist(getDirectionNode(x, y, LEFT)->getStartDist() + 1);
+      if (getDirectionNode(x, y, LEFT)->getStartDist() + 1 < tracker->getStartDist()) {
+         tracker->setStartDist(getDirectionNode(x, y, LEFT)->getStartDist() + 1);
+      }
    }
-   if (this->canTravel(x, y, UP)) { 
-      if (getDirectionNode(x, y, UP)->getStartDist() + 1 < currentPosition->getStartDist()) 
-         currentPosition->setStartDist(getDirectionNode(x, y, UP)->getStartDist() + 1);
+   if (this->canTravel(x, y, UP)) {
+      if (getDirectionNode(x, y, UP)->getStartDist() + 1 < tracker->getStartDist()) {
+         tracker->setStartDist(getDirectionNode(x, y, UP)->getStartDist() + 1);
+      }
    }
    if (this->canTravel(x, y, DOWN)) {
-      if (getDirectionNode(x, y, DOWN)->getStartDist() + 1 < currentPosition->getStartDist()) 
-         currentPosition->setStartDist(getDirectionNode(x, y, DOWN)->getStartDist() + 1);
+      if (getDirectionNode(x, y, DOWN)->getStartDist() + 1 < tracker->getStartDist()) {
+         tracker->setStartDist(getDirectionNode(x, y, DOWN)->getStartDist() + 1);
+      }
    }
+
+   if (tracker->getNumOfTraversals() < 1) return;
+
 
    // Then branches out to update the start distance of adjacent, reachable nodes, and the nodes that 
    // are adjacent and reachable to those nodes and so on... ONLY if the node being considered (aka the node
@@ -233,25 +242,23 @@ void Maze::updateStartDistances(int x, int y) {
 
    // only do this until it reaches a node for which start distance is already less than the current start distance + 1
    if (this->canTravel(x, y, RIGHT)) {
-      if (currentPosition->getStartDist() + 1 < getDirectionNode(x, y, RIGHT)->getStartDist()) {
-         getDirectionNode(x, y, RIGHT)->setStartDist(currentPosition->getStartDist() + 1);
-      } 
+      if (tracker->getStartDist() + 1 < getDirectionNode(x, y, RIGHT)->getStartDist())
+         updateStartDistances(getDirectionNode(x, y, RIGHT)->getXCoor(), getDirectionNode(x, y, RIGHT)->getYCoor());
    }
    if (this->canTravel(x, y, LEFT)) { 
-      if (currentPosition->getStartDist() + 1 < getDirectionNode(x, y, LEFT)->getStartDist()) {
-         getDirectionNode(x, y, LEFT)->setStartDist(currentPosition->getStartDist() + 1);
-      } 
+      if (tracker->getStartDist() + 1 < getDirectionNode(x, y, LEFT)->getStartDist())
+         updateStartDistances(getDirectionNode(x, y, LEFT)->getXCoor(), getDirectionNode(x, y, LEFT)->getYCoor());
    }
-   if (this->canTravel(x, y, UP)) { 
-      if (currentPosition->getStartDist() + 1 < getDirectionNode(x, y, UP)->getStartDist()) {
-         getDirectionNode(x, y, UP)->setStartDist(currentPosition->getStartDist() + 1);
-      } 
+   if (this->canTravel(x, y, UP)) {
+      if (tracker->getStartDist() + 1 < getDirectionNode(x, y, UP)->getStartDist())
+         updateStartDistances(getDirectionNode(x, y, UP)->getXCoor(), getDirectionNode(x, y, UP)->getYCoor()); 
    }
    if (this->canTravel(x, y, DOWN)) {
-      if (currentPosition->getStartDist() + 1 < getDirectionNode(x, y, DOWN)->getStartDist()) {
-         getDirectionNode(x, y, DOWN)->setStartDist(currentPosition->getStartDist() + 1);
-      } 
+      if (tracker->getStartDist() + 1 < getDirectionNode(x, y, DOWN)->getStartDist())
+         updateStartDistances(getDirectionNode(x, y, DOWN)->getXCoor(), getDirectionNode(x, y, DOWN)->getYCoor());
    }
+
+   return;
 }
 
 MazeNode *Maze::nextNodeAStar() {
@@ -259,15 +266,17 @@ MazeNode *Maze::nextNodeAStar() {
    if (this->solutionFound) return NULL;
    MazeNode *next;
 
-   // printf("x: %d, y: %d, startdist: %d, Manhattandist: %.1f, Score: %.1f, Walls: %d %d %d %d\n", 
    //    currentPosition->getXCoor(), currentPosition->getYCoor(), currentPosition->getStartDist(), 
    //    currentPosition->getManhattanDist(), currentPosition->getScore(), currentPosition->hasWall(RIGHT), currentPosition->hasWall(DOWN), currentPosition->hasWall(LEFT), currentPosition->hasWall(UP));
 
    currentPosition->incrementNumOfTraversals();
    if (currentPosition->getNumOfTraversals() == 1) {
-      currentPosition->markSolution();
       numTraversed++;
    }
+   int x = currentPosition->getXCoor();
+   int y = currentPosition->getYCoor();
+
+   updateStartDistances(x, y);
 
    if (currentPosition == nodeTarget) {
       solutionFound = true;
@@ -275,31 +284,42 @@ MazeNode *Maze::nextNodeAStar() {
    }
 
    double score = 100000.0;
-   int x = currentPosition->getXCoor();
-   int y = currentPosition->getYCoor();
 
-   updateStartDistances(x, y);
-
-
-   if (this->canTravel(x, y, RIGHT)) {
+   if (this->canTravel(x, y, RIGHT) && getDirectionNode(x, y, RIGHT)->shouldTraverse()) {
+      if (getDirectionNode(x, y, RIGHT)->getNumOfTraversals() == 0) {
+         currentPosition = getDirectionNode(x, y, RIGHT);
+         return currentPosition;
+      }
       if (hasBetterScore(RIGHT, x, y, score, next)) {
          score = getDirectionNode(x, y, RIGHT)->getScore();
          next = getDirectionNode(x, y, RIGHT);
       }
    }
-   if (this->canTravel(x, y, LEFT)) { 
+   if (this->canTravel(x, y, LEFT) && getDirectionNode(x, y, LEFT)->shouldTraverse()) { 
+      if (getDirectionNode(x, y, LEFT)->getNumOfTraversals() == 0) {
+         currentPosition = getDirectionNode(x, y, LEFT);
+         return currentPosition;
+      }
       if (hasBetterScore(LEFT, x, y, score, next)) {
          score = getDirectionNode(x, y, LEFT)->getScore();
          next = getDirectionNode(x, y, LEFT);
       }
    }
-   if (this->canTravel(x, y, UP)) { 
+   if (this->canTravel(x, y, UP) && getDirectionNode(x, y, UP)->shouldTraverse()) { 
+      if (getDirectionNode(x, y, UP)->getNumOfTraversals() == 0) {
+         currentPosition = getDirectionNode(x, y, UP);
+         return currentPosition;
+      }
       if (hasBetterScore(UP, x, y, score, next)) {
          score = getDirectionNode(x, y, UP)->getScore();
          next = getDirectionNode(x, y, UP);
       }
    }
-   if (this->canTravel(x, y, DOWN)) {
+   if (this->canTravel(x, y, DOWN) && getDirectionNode(x, y, DOWN)->shouldTraverse()) {
+      if (getDirectionNode(x, y, DOWN)->getNumOfTraversals() == 0) {
+         currentPosition = getDirectionNode(x, y, DOWN);
+         return currentPosition;
+      }
       if (hasBetterScore(DOWN, x, y, score, next)) {
          score = getDirectionNode(x, y, DOWN)->getScore();
          next = getDirectionNode(x, y, DOWN);

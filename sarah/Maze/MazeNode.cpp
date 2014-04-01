@@ -48,7 +48,6 @@ void MazeNode::setValues(int coorX, int coorY, double manDist, int startingDist,
    walls.negY = newWalls[3];
 
    numOfTraversals = 0; // number of times node crossed in finding a sucessful path
-   solutionNode = false; // true if part of solution path, false otherwise
 }
 
 /* Returns x coordinate */
@@ -114,23 +113,20 @@ void MazeNode::incrementNumOfTraversals() {
    numOfTraversals++;
 }
 
-/* Marks the node as a part of the solution path */
-void MazeNode::markSolution() {
-   solutionNode = true;
-}
-
-/* Unmarks the node as a part of the solution path */
-void MazeNode::unmarkSolution() {
-   solutionNode = false;
-}
-
 /* Changes start distcance */
 void MazeNode::setStartDist(int dist) {
    startDist = dist;
 }
 
-/* Returns true if node is part of solution, false otherwise */
-bool MazeNode::checkSolution() {
-   return solutionNode;
+int MazeNode::getNumOfOpenWalls() {
+   int num = 0;
+   if (!(walls.posX)) num++;
+   if (!(walls.negX)) num++;
+   if (!(walls.negY)) num++;
+   if (!(walls.posY)) num++;
+   return num;
 }
 
+bool MazeNode::shouldTraverse() {
+   return numOfTraversals < getNumOfOpenWalls()*getNumOfOpenWalls() + 1;
+}
