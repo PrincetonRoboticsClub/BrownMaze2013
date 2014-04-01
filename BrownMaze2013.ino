@@ -36,11 +36,11 @@
 /** PID Constants **/
 #define TANK_I_GAIN 0.03 // 0.03, 0.09
 #define POS_P_GAIN 0.025 // 0.01, 0.05
-#define ANGLE_P_GAIN 0.13 // 0.095
+#define ANGLE_P_GAIN 0.125 // 0.095, 0.13
 #define ANGLE_I_GAIN 0.00 // 0.01
 #define ANGLE_D_GAIN 0.00 // 0.02
-#define DANGLE_P_GAIN 0.9 // 0.4, 0.7
-#define DANGLE_D_GAIN 0.7 // 0.1, 0.3
+#define DANGLE_P_GAIN 0.9 // 0.4, 0.9
+#define DANGLE_D_GAIN 0.7 // 0.1, 0.7
 
 #define TILE_LENGTH 22.0f // 18cm
 
@@ -129,10 +129,6 @@ void setup() {
   // Turn to Angle
   //r->setSetAngle(PI/2.0);
 
-  // Use Program Sequence Counter
-  //programCount = 0;
-  //programSequence(programCount);
-
   // Start In Manual Mode (Not SetPoints Allowed)
   //r->manual();
 }
@@ -141,11 +137,11 @@ int n = 1;
 
 void loop() {
 
-  //
+  // stop switch
   while (digitalRead(13)) {
     r->brake();
     delay(500);
-    //r->reset();
+    //r->reset(); // doesnt exist
   }
   
   if(r->getState() == kWaiting) {
@@ -154,22 +150,6 @@ void loop() {
     while (millis() - t < 2000) {r->update();}
   }
 
-  /*
-  Serial.print("Left: ");
-   Serial.print(r->getLeftSpeed());
-   Serial.print("; Right: ");
-   Serial.println(r->getRightSpeed());
-   */
-
-   /*
-  Serial.print("Angle: ");
-  Serial.print(r->getAngle());
-  Serial.print("; X: ");
-  Serial.print(r->getX());
-  Serial.print("; Y: ");
-  Serial.println(r->getY());
-  */
-
   // run in a straight line forever! - square by square
   /*while (r->getState() != kWaiting) {r->update();}
   long t = millis();
@@ -177,6 +157,7 @@ void loop() {
   r->setSetPosition(n++ * TILE_LENGTH, 0.0f);
   */
 
+  //printData();
   r->update();
 }
 
@@ -197,3 +178,18 @@ void isrRB() {
   r->getRightEncoder()->encoderEvent(false);
 }
 
+void printData() {
+  Serial.print("Angle: ");
+  Serial.print(r->getAngle()*180.0/PI);
+  Serial.print("; X: ");
+  Serial.print(r->getX());
+  Serial.print("; Y: ");
+  Serial.println(r->getY());
+
+  /*
+  Serial.print("Left: ");
+  Serial.print(r->getLeftSpeed());
+  Serial.print("; Right: ");
+  Serial.println(r->getRightSpeed());
+  */
+}
