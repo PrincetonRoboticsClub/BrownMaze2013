@@ -5,9 +5,9 @@
 #include <Arduino.h>
 
 // Fudge Factors
-#define ANGLE_DEADBAND 0.02f
-#define ANGLE_SPD_DEADBAND 0.05f
-#define POS_DEADBAND 1.0f // at present this works best if its a function of starting distance
+#define ANGLE_DEADBAND 0.02f // 0.02f
+#define ANGLE_SPD_DEADBAND 1.70f // 0.05f  -- as is, this can be very high
+#define POS_DEADBAND 1.8f // at present this works best if its a function of starting distance
                           // maybe has (partially) to do with lag created by the I controllers
 
 /*** Static Functions ***/
@@ -146,8 +146,6 @@ void Robot::update() {
 	float straightOut;
 	float turnOut;
 
-Serial.println(sCurrentState);
-
 	// State Machine
 	switch(sCurrentState) {
 		case kMoving:
@@ -156,7 +154,8 @@ Serial.println(sCurrentState);
 			//        we can make everything faster by making it not euclidean
 			straightOut = fMaxSpeed * pPosition->compute(-1.0f * euclidean(fX, fY, targetX, targetY));
 			//turnOut = fMaxSpeed * pDriveAngle->compute(angleClamp(fAngle, targetAngle), angleClamp(atan2((targetY-fY) * (1.0f+0.1f*cos(targetAngle)), (targetX-fX) * (1.0f+0.1f*sin(targetAngle))), targetAngle));
-			turnOut = fMaxSpeed * pDriveAngle->compute(angleClamp(fAngle, targetAngle), angleClamp(atan2(targetY-fY, targetX-fX), targetAngle));
+			turnOut = fMaxSpeed * pDriveAngle->compute(angleClamp(fAngle, targetAngle), angleClamp(atan2(targetY-fY, targetX-fX /*+ 5.0*/), targetAngle));
+			//turnOut = fMaxSpeed * pDriveAngle->compute(angleClamp(fAngle, targetAngle), targetAngle);
 			/*
 			Serial.print("Straight: ");
 			Serial.print(straightOut);
@@ -170,7 +169,7 @@ Serial.println(sCurrentState);
 				arcade(straightOut, turnOut);
 			break;
 		case kTurning:
-			turnOut = fMaxSpeed*pAngle->compute(fAngle, targetAngle);
+			turnOut = fMaxSpeed*pAngle->compute(angleClamp(fAngle, targetAngle), targetAngle);
 			if(abs(fAngle-targetAngle) < ANGLE_DEADBAND) {
 				if(getAngularSpeed() < ANGLE_SPD_DEADBAND) {
 					sCurrentState = kWaiting;
@@ -188,6 +187,9 @@ Serial.println(sCurrentState);
 			// makes behavior smoother and gets rid of whining noise
 			mLeft->brake();
 			mRight->brake();
+
+			pLeftSpeed->reset();
+			pRightSpeed->reset();
 
 			//mLeft->tank(0.0f, 0.0f);
 			//mRight->tank(0.0f, 0.0f);

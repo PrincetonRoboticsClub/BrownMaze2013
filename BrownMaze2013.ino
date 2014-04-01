@@ -36,16 +36,19 @@
 /** PID Constants **/
 #define TANK_I_GAIN 0.03 // 0.03, 0.09
 #define POS_P_GAIN 0.025 // 0.01, 0.05
-#define ANGLE_P_GAIN 0.095
-#define ANGLE_I_GAIN 0.01
-#define ANGLE_D_GAIN 0.02
+#define ANGLE_P_GAIN 0.13 // 0.095
+#define ANGLE_I_GAIN 0.00 // 0.01
+#define ANGLE_D_GAIN 0.00 // 0.02
 #define DANGLE_P_GAIN 0.9 // 0.4, 0.7
 #define DANGLE_D_GAIN 0.7 // 0.1, 0.3
 
-#define TILE_LENGTH 22.0f
+#define TILE_LENGTH 22.0f // 18cm
+
+// could change angle behavior to have a different max speed for
+// turning than straight -- this would help prevent overshoot
 
 Robot* r;
-int programCount;
+int programCount = 0;
 
 
 // Program Sequence
@@ -121,7 +124,7 @@ void setup() {
 
   // Move to Point
   //r->setSetPosition(50.0f, 0.0f);
-  r->setSetPosition(TILE_LENGTH, 10.0f);
+  //r->setSetPosition(TILE_LENGTH, 10.0f);
 
   // Turn to Angle
   //r->setSetAngle(PI/2.0);
@@ -138,17 +141,18 @@ int n = 1;
 
 void loop() {
 
+  //
   while (digitalRead(13)) {
-    n = 1;
+    r->brake();
     delay(500);
     //r->reset();
   }
   
-  /*if(r->getState() == kWaiting) {
+  if(r->getState() == kWaiting) {
+    programSequence(programCount++);
     long t = millis();
-    while (millis() - t < 200) {r->update();}
-    programSequence(++programCount);
-  }*/
+    while (millis() - t < 2000) {r->update();}
+  }
 
   /*
   Serial.print("Left: ");
@@ -157,14 +161,14 @@ void loop() {
    Serial.println(r->getRightSpeed());
    */
 
-   
+   /*
   Serial.print("Angle: ");
   Serial.print(r->getAngle());
   Serial.print("; X: ");
   Serial.print(r->getX());
   Serial.print("; Y: ");
   Serial.println(r->getY());
-  
+  */
 
   // run in a straight line forever! - square by square
   /*while (r->getState() != kWaiting) {r->update();}
