@@ -104,11 +104,13 @@ int main(void) {
    int c;
    int width;
    int height;
+   int shortlen;
    bool g[16][16][4];
 
    scanf("%d\n", &width);
    scanf("%d\n", &height);
-   
+   scanf("%d\n", &shortlen);
+
    int hor = 0;
    int ver = 0;
    while ((c = getchar()) != EOF) {
@@ -364,6 +366,7 @@ int main(void) {
 
    printf("Number of nodes traversed: %d\n", test5.getNumOfNodesTraversed());
    printf("Number of traversals: %d\n", nums);
+   printf("Shortest path length to center node [7,7]: \nShould be: \t\t%d\nYour maze found: \t%d\n", shortlen, test5.getTargetNode()->getStartDist());
    
    int size5 = 256;
    enum Direction *path5;
