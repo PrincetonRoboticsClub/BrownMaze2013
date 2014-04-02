@@ -178,31 +178,6 @@ int main(void) {
 
    test5.setValues(width, height, 0, 15, 7.5, 7.5);
 
-// 7 7
-// 66
-// Number of nodes traversed: 230
-// Number of traversals: 1186
-
-//    88
-//    66
-//    Number of nodes traversed: 129
-// Number of traversals: 200
-
-// 7.5 7.5
-//    66
-//    Number of nodes traversed: 139
-// Number of traversals: 218
-
-// 7 8
-//    66
-//    Number of nodes traversed: 137
-// Number of traversals: 219
-
-// 8 7
-//    66
-//    Number of nodes traversed: 224
-// Number of traversals: 1137
-
    test5.applyMazeWalls(g, width, height);
 
    test5.applyAStarAlgorithm();

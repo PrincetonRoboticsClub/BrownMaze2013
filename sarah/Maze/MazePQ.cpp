@@ -25,6 +25,13 @@ void MazePQ::exch(int a, int b) {
 
 bool MazePQ::nodeGreater(int a, int b) {
 	// test if a is greater than b
+	// if (heap[a]->getScore() > heap[b]->getScore())
+	// 	return true;
+	// else if (heap[a]->getScore() == heap[b]->getScore() 
+	// 	&& heap[a]->getManhattanDist() > heap[b]->getManhattanDist())
+	// 	return true;
+
+	// SARAH make it so that the heap returns the one with the start distance closest to the reference node (the node currently being worked on)
 	if (heap[a]->getScore() > heap[b]->getScore())
 		return true;
 	else if (heap[a]->getScore() == heap[b]->getScore() 

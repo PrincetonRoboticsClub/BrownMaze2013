@@ -62,7 +62,7 @@ int MazeNode::getYCoor() {
 
 /* Returns node's score (sum of manhattan and number of traversals) */
 double MazeNode::getScore() {
-   return 0.9999*manhattanDist + 1.0001*startDist + 4.0001*numOfTraversals;
+   return 1.0001*manhattanDist + 0.9999*startDist + 4.0000*numOfTraversals;
 }
 
 //    return 0.9999*manhattanDist + 1.0001*startDist + 4.0001*numOfTraversals;
@@ -125,5 +125,14 @@ int MazeNode::getNumOfOpenWalls() {
 }
 
 bool MazeNode::shouldTraverse() {
-   return numOfTraversals < getNumOfOpenWalls()*getNumOfOpenWalls() + 1;
+   return (!deadEnd && numOfTraversals < getNumOfOpenWalls());
 }
+
+void MazeNode::markDeadEnd() {
+   deadEnd = true;
+}
+
+bool MazeNode::isDeadEnd() {
+   return deadEnd;
+}
+
