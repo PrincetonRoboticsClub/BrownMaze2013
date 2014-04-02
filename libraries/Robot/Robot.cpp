@@ -5,8 +5,8 @@
 #include <Arduino.h>
 
 // Fudge Factors
-#define ANGLE_DEADBAND 0.02f // 0.02f
-#define ANGLE_SPD_DEADBAND 1.70f // 0.05f  -- as is, this can be very high
+#define ANGLE_DEADBAND 0.05f // 0.02, 0.08
+#define ANGLE_SPD_DEADBAND 5.0f // 0.05f  -- as is, this can be very high
 #define POS_DEADBAND 1.8f // at present this works best if its a function of starting distance
                           // maybe has (partially) to do with lag created by the I controllers
 
@@ -148,36 +148,51 @@ void Robot::update() {
 
 	// State Machine
 	switch(sCurrentState) {
+		// constants for kMoving
+		float straightInput;
+		float turnInput;
+		float turnSetPoint;
+
 		case kMoving:
 			// @TODO: change PID to not be based off euclidean distance
 			//        or make end condition not based off euclidean distance
 			//        we can make everything faster by making it not euclidean
-			straightOut = fMaxSpeed * pPosition->compute(-1.0f * euclidean(fX, fY, targetX, targetY));
-			//turnOut = fMaxSpeed * pDriveAngle->compute(angleClamp(fAngle, targetAngle), angleClamp(atan2((targetY-fY) * (1.0f+0.1f*cos(targetAngle)), (targetX-fX) * (1.0f+0.1f*sin(targetAngle))), targetAngle));
-			turnOut = fMaxSpeed * pDriveAngle->compute(angleClamp(fAngle, targetAngle), angleClamp(atan2(targetY-fY, targetX-fX /*+ 5.0*/), targetAngle));
-			//turnOut = fMaxSpeed * pDriveAngle->compute(angleClamp(fAngle, targetAngle), targetAngle);
-			/*
-			Serial.print("Straight: ");
-			Serial.print(straightOut);
-			*/
-			if (euclidean(fX, fY, targetX, targetY) < (1.5f*POS_DEADBAND))
-				turnOut = fMaxSpeed*pDriveAngle->compute(fAngle, targetAngle);
-			if (euclidean(fX, fY, targetX, targetY) < POS_DEADBAND) {
+			// well actually its working decently at the moment :)
+			straightInput = euclidean(fX, fY, targetX, targetY);
+			straightOut = fMaxSpeed * pPosition->compute(-1.0f * straightInput);
+
+			turnInput = angleClamp(fAngle, targetAngle);
+			turnSetPoint = angleClamp(atan2(targetY-fY, targetX-fX), targetAngle);
+			//float turnSetPoint = angleClamp(atan2((targetY-fY) * (1.0f+0.1f*cos(targetAngle)), (targetX-fX) * (1.0f+0.1f*sin(targetAngle))), targetAngle);
+			turnOut = fMaxSpeed * pDriveAngle->compute(turnInput, turnSetPoint);
+
+			// seems to have almost no effect currently
+			//if (straightInput < (1.5f*POS_DEADBAND))
+			//	turnOut = fMaxSpeed*pDriveAngle->compute(fAngle, targetAngle);
+
+			if (straightInput < POS_DEADBAND) {
 				sCurrentState = kWaiting;
 				fAngle = angleClamp(fAngle, 0.0f);
 			} else
 				arcade(straightOut, turnOut);
 			break;
 		case kTurning:
+			Serial.print(angleClamp(fAngle, targetAngle));
+			Serial.print(" -> ");
+			Serial.print(targetAngle);
+			Serial.print("  :  ");
+			Serial.print(ANGLE_DEADBAND);
+			Serial.println();
 			turnOut = fMaxSpeed*pAngle->compute(angleClamp(fAngle, targetAngle), targetAngle);
-			if(abs(fAngle-targetAngle) < ANGLE_DEADBAND) {
-				if(getAngularSpeed() < ANGLE_SPD_DEADBAND) {
+			// having angleClamp in the next line is very important!!!
+			if(abs(angleClamp(fAngle, targetAngle)-targetAngle) < ANGLE_DEADBAND) {
+			//	if(getAngularSpeed() < ANGLE_SPD_DEADBAND) {
 					sCurrentState = kWaiting;
 					fAngle = angleClamp(fAngle, 0.0f);
-				} else {
-					pLeftSpeed->reset();
-					pRightSpeed->reset();
-				}
+			//	} else {
+			//		pLeftSpeed->reset();
+			//		pRightSpeed->reset();
+			//	}
 			}
 			else {
 				arcade(0.0f, turnOut);
