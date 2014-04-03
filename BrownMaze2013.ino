@@ -28,69 +28,26 @@
 /** Robot Dimenion Definitions (cm or cm/s) **/
 #define WHEEL_RADIUS 2.0f
 #define WHEEL_BASE 10.0f
-#define MAX_SPEED 70.0f // 70.0f
+#define MAX_SPEED 70.0f // 70.0 is the real max
 
 #define COUNT_PER_REV 1200
 #define TIMEOUT 10000
 
 /** PID Constants **/
-#define TANK_I_GAIN 0.03 // 0.03, 0.09
-#define POS_P_GAIN 0.025 // 0.01, 0.05
-#define ANGLE_P_GAIN 0.125 // 0.095, 0.13
-#define ANGLE_I_GAIN 0.00 // 0.01
-#define ANGLE_D_GAIN 0.00 // 0.02
-#define DANGLE_P_GAIN 0.9 // 0.4, 0.9
-#define DANGLE_D_GAIN 0.7 // 0.1, 0.7
+#define TANK_I_GAIN 0.03
+#define POS_P_GAIN 0.025
+#define ANGLE_P_GAIN 0.135
+#define ANGLE_I_GAIN 0.00
+#define ANGLE_D_GAIN 0.00
+#define DANGLE_P_GAIN 0.9
+#define DANGLE_D_GAIN 0.7
 
-#define TILE_LENGTH 22.0f // 18cm
-
-// could change angle behavior to have a different max speed for
-// turning than straight -- this would help prevent overshoot
+// length of a maze tile (18cm)
+#define TILE_LENGTH 22.0f
+// ms delay for waits
+#define INSTRUCTION_DELAY 400
 
 Robot* r;
-int programCount = 0;
-
-
-// Program Sequence
-void programSequence(int progCount) {
-  switch(progCount) {
-  case 0:
-    r->setSetPosition(TILE_LENGTH, 0.0f);
-    Serial.println("STRAIGHT X");
-    break;
-  case 1:
-    r->setSetAngle(PI * 0.5f);
-    Serial.println("TURN PI/2");
-    break;
-  case 2:
-    r->setSetPosition(TILE_LENGTH, TILE_LENGTH);
-    Serial.println("STRAIGHT Y");
-    break;
-  case 3:
-    r->setSetAngle(PI);
-    Serial.println("TURN PI");
-    break;
-  case 4:
-    r->setSetPosition(0.0f, TILE_LENGTH);
-    Serial.println("STRAIGHT -X");
-    break;
-  case 5:
-    r->setSetAngle(PI * 1.5f);
-    Serial.println("TURN 3PI/2");
-    break;
-  case 6:
-    r->setSetPosition(0.0f, 0.0f);
-    break;
-  case 7:
-    r->setSetAngle(0.0f);
-    break;
-  default:
-    // Do Nothing!
-    Serial.println("DONE!");
-  }
-}
-
-//float fTileLength = 2100.0*2*PI*WHEEL_RADIUS/COUNT_PER_REV; // 21.99
 
 void setup() {
   // stop switch pin
@@ -112,6 +69,7 @@ void setup() {
   PCattachInterrupt(PIN_ERB, isrRB, CHANGE);
 
   Serial.begin(9600);
+
   r->begin(
   new PID(0.0, TANK_I_GAIN, 0.0), // Left I Controller
   new PID(0.0, TANK_I_GAIN, 0.0), // Right I Controller
@@ -133,32 +91,72 @@ void setup() {
   //r->manual();
 }
 
-int n = 1;
-
 void loop() {
 
   // stop switch
+  // maybe this can be built in to update()??
   while (digitalRead(13)) {
-    r->brake();
-    delay(500);
-    //r->reset(); // doesnt exist
-  }
-  
-  if(r->getState() == kWaiting) {
-    programSequence(programCount++);
-    long t = millis();
-    while (millis() - t < 2000) {r->update();}
+    r->reset();
+    delay(1000);
+    r->reset();
   }
 
-  // run in a straight line forever! - square by square
-  /*while (r->getState() != kWaiting) {r->update();}
-  long t = millis();
-  while (millis() - t < 200) {r->update();}
-  r->setSetPosition(n++ * TILE_LENGTH, 0.0f);
+  /*
+  // drive a small portion of the maze
+  r->wait(INSTRUCTION_DELAY);
+  // forward 3 tiles
+  r->changeSetX(TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetX(TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetX(TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // quarter turn right
+  r->changeSetAngle(PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // forward 1 tile
+  r->changeSetY(TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // quarter turn right
+  r->changeSetAngle(PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // forward 2 tiles
+  r->changeSetX(-TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetX(-TILE_LENGTH);
+  r->waitForNext();
+  // done
+  r->wait(1000000);
   */
 
+  //r->waitForNext(INSTRUCTION_DELAY);
+  //r->changeSetAngle(PI/2);
+
+  // move in a square
+  //r->waitForNext(INSTRUCTION_DELAY);
+  //r->changeSetX(TILE_LENGTH);
+  //r->waitForNext(INSTRUCTION_DELAY);
+  //r->changeSetAngle(PI/2);
+  //r->waitForNext(INSTRUCTION_DELAY);
+  //r->changeSetY(TILE_LENGTH);
+  //r->waitForNext(INSTRUCTION_DELAY);
+  //r->changeSetAngle(PI/2);
+  //r->waitForNext(INSTRUCTION_DELAY);
+  //r->changeSetX(-TILE_LENGTH);
+  //r->waitForNext(INSTRUCTION_DELAY);
+  //r->changeSetAngle(PI/2);
+  //r->waitForNext(INSTRUCTION_DELAY);
+  //r->changeSetY(-TILE_LENGTH);
+  //r->waitForNext(INSTRUCTION_DELAY);
+  //r->changeSetAngle(PI/2);
+
+  // run in a straight line forever! - square by square
+  r->waitForNext(INSTRUCTION_DELAY);
+  Serial.println("changed x");
+  r->changeSetX(TILE_LENGTH);
+
+  //r->update(); // for code in setup
   //printData();
-  r->update();
 }
 
 

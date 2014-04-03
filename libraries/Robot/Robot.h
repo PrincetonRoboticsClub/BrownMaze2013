@@ -90,6 +90,16 @@
  	void manual(); // Changes to Manual Mode
  	void begin(PID* pLS, PID* pRS, PID* pP, PID* pDA, PID* pA); // Changes to Non-Manual Mode
 
+   void wait(long ms); // wait for ms milliseconds
+   void waitForNext(); // wait for the robot to be in state kWaiting
+   void waitForNext(long ms); // wait for state to be kWaiting, then wait ms millis
 
+   void reset(); // reset the robot
+
+   void changeSetX(float dx); // change target x by dx
+   void changeSetY(float dy); // change target y by dy
+   void changeSetAngle(float da); // change target angle by da
+
+   //void doInstructions(Instruction* instructions);
  };
 #endif
