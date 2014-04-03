@@ -243,7 +243,6 @@ MazeNode *Maze::nextNodeAStar() {
    int x = currentPosition->getXCoor();
    int y = currentPosition->getYCoor();
 
-   printf("%d %d\n", x, y);
    updateStartDistances(x, y);
 
    if (currentPosition == nodeTarget) {
@@ -340,9 +339,12 @@ MazeNode *Maze::nextNodeAStar() {
    }
 
    if (currentPosition == next) {
+      printf("%d %d\n", x, y);
       do {
          next = q.pop();
       } while (next->getNumOfTraversals() != 0);
+      printf("%d %d\n", next->getXCoor(), next->getYCoor());
+
    }
    
    // use another mazenode variable to make sure it only goes in directions it has not gone before
