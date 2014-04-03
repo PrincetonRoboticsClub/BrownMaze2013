@@ -19,7 +19,7 @@
 #ifndef MAZENODE_H
 #define MAZENODE_H
 
-enum Direction {UP, DOWN, RIGHT, LEFT};
+enum Direction {UP = 1, DOWN = -1, RIGHT = 2, LEFT = -2};
 
 /* Represents the walls of the node. Could be represented by an array of 
    booleans but a struct is more expressive option. */
@@ -39,7 +39,7 @@ class MazeNode {
     int startDist; // shortest distance in number of nodes from start node
     struct NodeWalls walls; // find out if there are any walls around the node
     int numOfTraversals; // number of times node crossed in finding a sucessful path
-    bool solutionNode; // true if part of solution path, false otherwise
+    bool deadEnd;
 
   public:
     /* Constructor function takes in coordinates (coorX and coorY), a manhattan distance,
@@ -83,17 +83,16 @@ class MazeNode {
        make sense. */
     void incrementNumOfTraversals();
 
-    /* Marks the node as a part of the solution path */
-    void markSolution();
-
-    /* Marks the node as a part of the solution path */
-    void unmarkSolution();
-
-    /* Returns true if node is part of solution, false otherwise */
-    bool checkSolution();
-
     /* Changes start distcance */
     void setStartDist(int dist);
+
+    int getNumOfOpenWalls();
+
+    bool shouldTraverse();
+
+    void markDeadEnd();
+
+    bool isDeadEnd();
 
 };
 

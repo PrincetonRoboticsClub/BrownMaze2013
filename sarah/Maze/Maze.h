@@ -12,6 +12,7 @@
 #ifndef MAZE_H
 #define MAZE_H
 
+#include "MazePQ.h"
 #include "MazeNode.h"
 #include <vector>
 
@@ -30,6 +31,7 @@ class Maze {
    MazeNode *nodeStart; // pointer to MazeNode in mazeArray of start node
    MazeNode *nodeTarget; // pointer to MazeNode in mazeArray of start node
    MazeNode *currentPosition; // pointer to MazeNode in mazeArray of start node
+   MazePQ q;
 
   public:
    /* Maze constructor takes dimensions of a rectangular maze represented

@@ -178,31 +178,6 @@ int main(void) {
 
    test5.setValues(width, height, 0, 15, 7.5, 7.5);
 
-// 7 7
-// 66
-// Number of nodes traversed: 230
-// Number of traversals: 1186
-
-//    88
-//    66
-//    Number of nodes traversed: 129
-// Number of traversals: 200
-
-// 7.5 7.5
-//    66
-//    Number of nodes traversed: 139
-// Number of traversals: 218
-
-// 7 8
-//    66
-//    Number of nodes traversed: 137
-// Number of traversals: 219
-
-// 8 7
-//    66
-//    Number of nodes traversed: 224
-// Number of traversals: 1137
-
    test5.applyMazeWalls(g, width, height);
 
    test5.applyAStarAlgorithm();
@@ -333,40 +308,9 @@ int main(void) {
       }
    }
 
-   printf("\nMazeArray's Solution Nodes\n\n");
-   for (int j = 0; j < 16; j++) {
-      for (int i = 0; i < 16; i++) {
-         const char *a;
-         if ((test5.getNode(i, j))->hasWall(UP)) a = " -- ";
-         else a = "    ";
-         printf("%s", a);
-      }
-      printf("\n");
-      for (int i = 0; i < 16; i++) {
-         const char *a, *b;
-         if ((test5.getNode(i, j))->hasWall(LEFT)) a = "|";
-         else a = " ";
-         printf("%s%2d ", a, (test5.getNode(i, j))->checkSolution());
-
-         if (i == 15 && (test5.getNode(i, j))->hasWall(RIGHT))
-            printf("|");;
-      }
-      printf("\n");
-      if (j == 15) {
-         for (int i = 0; i < 16; i++) {
-            const char *a;
-            if ((test5.getNode(i, j))->hasWall(DOWN)) 
-               printf(" -- ");
-            else 
-               printf("    ");
-         }
-         printf("\n");
-      }
-   }
-
    printf("Number of nodes traversed: %d\n", test5.getNumOfNodesTraversed());
    printf("Number of traversals: %d\n", nums);
-   printf("Shortest path length to center node [7,7]: \nShould be: \t\t%d\nYour maze found: \t%d\n", shortlen, test5.getTargetNode()->getStartDist());
+   printf("Shortest path length to center node [7,7]: \n\tShould be: \t\t%d\n\tYour maze found: \t%d\n", shortlen, test5.getTargetNode()->getStartDist());
    
    int size5 = 256;
    enum Direction *path5;

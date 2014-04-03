@@ -48,7 +48,6 @@ void MazeNode::setValues(int coorX, int coorY, double manDist, int startingDist,
    walls.negY = newWalls[3];
 
    numOfTraversals = 0; // number of times node crossed in finding a sucessful path
-   solutionNode = false; // true if part of solution path, false otherwise
 }
 
 /* Returns x coordinate */
@@ -63,10 +62,7 @@ int MazeNode::getYCoor() {
 
 /* Returns node's score (sum of manhattan and number of traversals) */
 double MazeNode::getScore() {
-   return 0.9999*manhattanDist + 1.0001*startDist + 4.0000*numOfTraversals;
-   // 4.001 to get there in fastest time
-   // 2.001 to get there in reasonable time with reasonable short path
-   // 1 to get there with shortest path
+   return 1.0001*manhattanDist + 0.9999*startDist + 4.0000*numOfTraversals;
 }
 
 //    return 0.9999*manhattanDist + 1.0001*startDist + 4.0001*numOfTraversals;
@@ -114,23 +110,29 @@ void MazeNode::incrementNumOfTraversals() {
    numOfTraversals++;
 }
 
-/* Marks the node as a part of the solution path */
-void MazeNode::markSolution() {
-   solutionNode = true;
-}
-
-/* Unmarks the node as a part of the solution path */
-void MazeNode::unmarkSolution() {
-   solutionNode = false;
-}
-
 /* Changes start distcance */
 void MazeNode::setStartDist(int dist) {
    startDist = dist;
 }
 
-/* Returns true if node is part of solution, false otherwise */
-bool MazeNode::checkSolution() {
-   return solutionNode;
+int MazeNode::getNumOfOpenWalls() {
+   int num = 0;
+   if (!(walls.posX)) num++;
+   if (!(walls.negX)) num++;
+   if (!(walls.negY)) num++;
+   if (!(walls.posY)) num++;
+   return num;
+}
+
+bool MazeNode::shouldTraverse() {
+   return (!deadEnd && numOfTraversals < getNumOfOpenWalls());
+}
+
+void MazeNode::markDeadEnd() {
+   deadEnd = true;
+}
+
+bool MazeNode::isDeadEnd() {
+   return deadEnd;
 }
 

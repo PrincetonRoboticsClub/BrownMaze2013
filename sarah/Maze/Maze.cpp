@@ -91,6 +91,8 @@ void Maze::setValues(int lenX, int lenY, int startX, int startY, double targetX,
    pathLength = 0; // length of path which IS NOT the number of nodes in the path (always 1 less than number of nodes in path)
 
    nodeStart->setStartDist(0);
+
+   q.setValues(lengthX*lengthY);
 }
 
 /* Returns the number of nodes traversed */
@@ -181,23 +183,16 @@ enum Direction *Maze::getAStarSolutionPath(int *length) {
    for (int i = pathLength - 1; i >= 0; i--) {
       int x = tracker->getXCoor();
       int y = tracker->getYCoor();
+
+      for (int j = -2; j <=2; j++) {
+         if (j != 0) {
+            if (canTravel(x, y, (enum Direction) j) && (getDirectionNode(x, y, (enum Direction) j)->getStartDist() == i)) {
+               val = (enum Direction) -j;
+               tracker = getDirectionNode(x, y, (enum Direction) j);
+            }
+         }
+      }
  
-      if (this->canTravel(x, y, RIGHT) && (getDirectionNode(x, y, RIGHT)->getStartDist() == i)) {
-         val = LEFT;
-         tracker = getDirectionNode(x, y, RIGHT);
-      }
-      else if (this->canTravel(x, y, LEFT) && (getDirectionNode(x, y, LEFT)->getStartDist() == i)) {
-         val = RIGHT;
-         tracker = getDirectionNode(x, y, LEFT);
-      }
-      else if (this->canTravel(x, y, UP) && (getDirectionNode(x, y, UP)->getStartDist() == i)) {
-         val = DOWN;
-         tracker = getDirectionNode(x, y, UP);
-      }
-      else if (this->canTravel(x, y, DOWN) && (getDirectionNode(x, y, DOWN)->getStartDist() == i)) { 
-         val = UP;
-         tracker = getDirectionNode(x, y, DOWN);
-      }
       path[i] = val;
    }
 
@@ -207,105 +202,152 @@ enum Direction *Maze::getAStarSolutionPath(int *length) {
 void Maze::updateStartDistances(int x, int y) {
    // the current flaw in this code versus a star is that the start distance is not computer completely accurately
 
+   MazeNode *tracker = getNode(x, y);
+
    // makes sure start distance of current node being considered is as small as possible
-   if (this->canTravel(x, y, RIGHT)) { 
-      if (getDirectionNode(x, y, RIGHT)->getStartDist() + 1 < currentPosition->getStartDist()) 
-         currentPosition->setStartDist(getDirectionNode(x, y, RIGHT)->getStartDist() + 1);
-   }
-   if (this->canTravel(x, y, LEFT)) { 
-      if (getDirectionNode(x, y, LEFT)->getStartDist() + 1 < currentPosition->getStartDist()) 
-         currentPosition->setStartDist(getDirectionNode(x, y, LEFT)->getStartDist() + 1);
-   }
-   if (this->canTravel(x, y, UP)) { 
-      if (getDirectionNode(x, y, UP)->getStartDist() + 1 < currentPosition->getStartDist()) 
-         currentPosition->setStartDist(getDirectionNode(x, y, UP)->getStartDist() + 1);
-   }
-   if (this->canTravel(x, y, DOWN)) {
-      if (getDirectionNode(x, y, DOWN)->getStartDist() + 1 < currentPosition->getStartDist()) 
-         currentPosition->setStartDist(getDirectionNode(x, y, DOWN)->getStartDist() + 1);
+
+   for (int j = -2; j <=2; j++) {
+      if (j != 0) {
+         if (canTravel(x, y, (enum Direction) j)) { 
+            if (getDirectionNode(x, y, (enum Direction) j)->getStartDist() + 1 < tracker->getStartDist()) {
+               tracker->setStartDist(getDirectionNode(x, y, (enum Direction) j)->getStartDist() + 1);
+            }
+         }
+      }
    }
 
-   // Then branches out to update the start distance of adjacent, reachable nodes, and the nodes that 
-   // are adjacent and reachable to those nodes and so on... ONLY if the node being considered (aka the node
-   // for which we are examining adjacent nodes) has already been visited. If this is not true,
-   // then we may have ended up updating a node for whom the walls had not yet been established, which would
-   // have meant looking at nodes that aren't actually reachable. 
+   if (tracker->getNumOfTraversals() < 1) return;
 
-   // only do this until it reaches a node for which start distance is already less than the current start distance + 1
-   if (this->canTravel(x, y, RIGHT)) {
-      if (currentPosition->getStartDist() + 1 < getDirectionNode(x, y, RIGHT)->getStartDist()) {
-         getDirectionNode(x, y, RIGHT)->setStartDist(currentPosition->getStartDist() + 1);
-      } 
+   for (int j = -2; j <=2; j++) {
+      if (j != 0) {
+         if (this->canTravel(x, y, (enum Direction) j)) {
+            if (getDirectionNode(x, y, (enum Direction) j)->getNumOfTraversals() == 0) q.push(getDirectionNode(x, y, (enum Direction) j));
+            if (tracker->getStartDist() + 1 < getDirectionNode(x, y, (enum Direction) j)->getStartDist())
+               updateStartDistances(getDirectionNode(x, y, (enum Direction) j)->getXCoor(), getDirectionNode(x, y, (enum Direction) j)->getYCoor());
+         }
+      }
    }
-   if (this->canTravel(x, y, LEFT)) { 
-      if (currentPosition->getStartDist() + 1 < getDirectionNode(x, y, LEFT)->getStartDist()) {
-         getDirectionNode(x, y, LEFT)->setStartDist(currentPosition->getStartDist() + 1);
-      } 
-   }
-   if (this->canTravel(x, y, UP)) { 
-      if (currentPosition->getStartDist() + 1 < getDirectionNode(x, y, UP)->getStartDist()) {
-         getDirectionNode(x, y, UP)->setStartDist(currentPosition->getStartDist() + 1);
-      } 
-   }
-   if (this->canTravel(x, y, DOWN)) {
-      if (currentPosition->getStartDist() + 1 < getDirectionNode(x, y, DOWN)->getStartDist()) {
-         getDirectionNode(x, y, DOWN)->setStartDist(currentPosition->getStartDist() + 1);
-      } 
-   }
+
+   return;
 }
 
 MazeNode *Maze::nextNodeAStar() {
    // account for whether or not it has been traversed
    if (this->solutionFound) return NULL;
-   MazeNode *next;
-
-   // printf("x: %d, y: %d, startdist: %d, Manhattandist: %.1f, Score: %.1f, Walls: %d %d %d %d\n", 
-   //    currentPosition->getXCoor(), currentPosition->getYCoor(), currentPosition->getStartDist(), 
-   //    currentPosition->getManhattanDist(), currentPosition->getScore(), currentPosition->hasWall(RIGHT), currentPosition->hasWall(DOWN), currentPosition->hasWall(LEFT), currentPosition->hasWall(UP));
+   MazeNode *next = currentPosition;
 
    currentPosition->incrementNumOfTraversals();
    if (currentPosition->getNumOfTraversals() == 1) {
-      currentPosition->markSolution();
       numTraversed++;
    }
+   int x = currentPosition->getXCoor();
+   int y = currentPosition->getYCoor();
+
+   printf("%d %d\n", x, y);
+   updateStartDistances(x, y);
 
    if (currentPosition == nodeTarget) {
       solutionFound = true;
       return NULL;
    }
 
+   // check for dead end
+   if (currentPosition->getNumOfOpenWalls() == 1) {
+      currentPosition->markDeadEnd();
+      if (this->canTravel(x, y, RIGHT)) {
+         currentPosition = getDirectionNode(x, y, RIGHT);
+      }
+      else if (this->canTravel(x, y, LEFT)) {
+         currentPosition = getDirectionNode(x, y, LEFT);
+      }
+      else if (this->canTravel(x, y, UP)) {
+         currentPosition = getDirectionNode(x, y, UP);
+      }
+      else if (this->canTravel(x, y, DOWN)) {
+         currentPosition = getDirectionNode(x, y, DOWN);
+      }
+      return currentPosition;
+   }
+   else if (currentPosition->getNumOfOpenWalls() == 2) {
+      if ((this->canTravel(x, y, RIGHT) && getDirectionNode(x, y, RIGHT)->isDeadEnd()) 
+         || (this->canTravel(x, y, LEFT) && getDirectionNode(x, y, LEFT)->isDeadEnd())
+         || (this->canTravel(x, y, DOWN) && getDirectionNode(x, y, DOWN)->isDeadEnd())
+         || (this->canTravel(x, y, UP) && getDirectionNode(x, y, UP)->isDeadEnd())) {
+
+
+         currentPosition->markDeadEnd();
+
+         if (this->canTravel(x, y, RIGHT) && !getDirectionNode(x, y, RIGHT)->isDeadEnd()) {
+            currentPosition = getDirectionNode(x, y, RIGHT);
+         }
+         else if (this->canTravel(x, y, LEFT) && !getDirectionNode(x, y, LEFT)->isDeadEnd()) {
+            currentPosition = getDirectionNode(x, y, LEFT);
+         }
+         else if (this->canTravel(x, y, UP) && !getDirectionNode(x, y, UP)->isDeadEnd()) {
+            currentPosition = getDirectionNode(x, y, UP);
+         }
+         else if (this->canTravel(x, y, DOWN) && !getDirectionNode(x, y, DOWN)->isDeadEnd()) {
+            currentPosition = getDirectionNode(x, y, DOWN);
+         }
+
+         return currentPosition;
+      }
+   }
+   else if (currentPosition->getNumOfOpenWalls() == 3) {
+      if ((this->canTravel(x, y, RIGHT) && getDirectionNode(x, y, RIGHT)->isDeadEnd() && this->canTravel(x, y, UP) && getDirectionNode(x, y, UP)->isDeadEnd())
+         || (this->canTravel(x, y, RIGHT) && getDirectionNode(x, y, RIGHT)->isDeadEnd() && this->canTravel(x, y, DOWN) && getDirectionNode(x, y, DOWN)->isDeadEnd())
+         || (this->canTravel(x, y, RIGHT) && getDirectionNode(x, y, RIGHT)->isDeadEnd() && this->canTravel(x, y, LEFT) && getDirectionNode(x, y, LEFT)->isDeadEnd()) 
+         || (this->canTravel(x, y, LEFT) && getDirectionNode(x, y, LEFT)->isDeadEnd() && this->canTravel(x, y, UP) && getDirectionNode(x, y, UP)->isDeadEnd())
+         || (this->canTravel(x, y, LEFT) && getDirectionNode(x, y, LEFT)->isDeadEnd() && this->canTravel(x, y, DOWN) && getDirectionNode(x, y, DOWN)->isDeadEnd())
+         || (this->canTravel(x, y, DOWN) && getDirectionNode(x, y, DOWN)->isDeadEnd() && this->canTravel(x, y, UP) && getDirectionNode(x, y, UP)->isDeadEnd())) {
+
+         currentPosition->markDeadEnd();
+
+         if (this->canTravel(x, y, RIGHT) && !getDirectionNode(x, y, RIGHT)->isDeadEnd()) {
+            currentPosition = getDirectionNode(x, y, RIGHT);
+         }
+         else if (this->canTravel(x, y, LEFT) && !getDirectionNode(x, y, LEFT)->isDeadEnd()) {
+            currentPosition = getDirectionNode(x, y, LEFT);
+         }
+         else if (this->canTravel(x, y, UP) && !getDirectionNode(x, y, UP)->isDeadEnd()) {
+            currentPosition = getDirectionNode(x, y, UP);
+         }
+         else if (this->canTravel(x, y, DOWN) && !getDirectionNode(x, y, DOWN)->isDeadEnd()) {
+            currentPosition = getDirectionNode(x, y, DOWN);
+         }
+
+         return currentPosition;
+      }
+   }
+
    double score = 100000.0;
-   int x = currentPosition->getXCoor();
-   int y = currentPosition->getYCoor();
 
-   updateStartDistances(x, y);
-
-
-   if (this->canTravel(x, y, RIGHT)) {
-      if (hasBetterScore(RIGHT, x, y, score, next)) {
-         score = getDirectionNode(x, y, RIGHT)->getScore();
-         next = getDirectionNode(x, y, RIGHT);
-      }
-   }
-   if (this->canTravel(x, y, LEFT)) { 
-      if (hasBetterScore(LEFT, x, y, score, next)) {
-         score = getDirectionNode(x, y, LEFT)->getScore();
-         next = getDirectionNode(x, y, LEFT);
-      }
-   }
-   if (this->canTravel(x, y, UP)) { 
-      if (hasBetterScore(UP, x, y, score, next)) {
-         score = getDirectionNode(x, y, UP)->getScore();
-         next = getDirectionNode(x, y, UP);
-      }
-   }
-   if (this->canTravel(x, y, DOWN)) {
-      if (hasBetterScore(DOWN, x, y, score, next)) {
-         score = getDirectionNode(x, y, DOWN)->getScore();
-         next = getDirectionNode(x, y, DOWN);
+   // possibility of getting no node....
+   // should never go to itself
+   for (int j = -2; j <=2; j++) {
+      if (j != 0) {
+         if (this->canTravel(x, y, (enum Direction) j) && getDirectionNode(x, y, (enum Direction) j)->shouldTraverse()) {
+            if (getDirectionNode(x, y, (enum Direction) j)->getNumOfTraversals() == 0) {
+               currentPosition = getDirectionNode(x, y, (enum Direction) j);
+               return currentPosition;
+            }
+            if (hasBetterScore((enum Direction) j, x, y, score, next)) {
+               score = getDirectionNode(x, y, (enum Direction) j)->getScore();
+               next = getDirectionNode(x, y, (enum Direction) j);
+            }
+         }
       }
    }
 
+   if (currentPosition == next) {
+      do {
+         next = q.pop();
+      } while (next->getNumOfTraversals() != 0);
+   }
+   
+   // use another mazenode variable to make sure it only goes in directions it has not gone before
+   // use structure to track loops --> each "loop" has a certain number of nodes on it --> when you arrive at on 
+      // of those nodes, look for new opening and follow that path --> do not return to loop
    currentPosition = next;
    return currentPosition;
 }
