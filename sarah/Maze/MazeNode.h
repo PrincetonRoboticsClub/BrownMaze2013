@@ -19,64 +19,44 @@
 #ifndef MAZENODE_H
 #define MAZENODE_H
 
-enum Direction {UP = 1, DOWN = -1, RIGHT = 2, LEFT = -2};
+#include "stdint.h"
 
-/* Represents the walls of the node. Could be represented by an array of 
-   booleans but a struct is more expressive option. */
-struct NodeWalls {
-  bool posX; // right
-  bool posY; // down
-  bool negX; // left
-  bool negY; // up
-};
+// enum Direction {UP = 1, DOWN = -1, RIGHT = 2, LEFT = -2};
 
 class MazeNode {
 
   private:
-    int xCoor; // horizontal coordinate with zero at left
-    int yCoor; // vertical coordinate with zero at top 
-    double manhattanDist; // sum of differences of x coordinates and y coordinates from target node
-    int startDist; // shortest distance in number of nodes from start node
-    struct NodeWalls walls; // find out if there are any walls around the node
-    int numOfTraversals; // number of times node crossed in finding a sucessful path
-    bool deadEnd;
+    char coords; // horizontal coordinate (low 4 bits), vertical coordinate (high 4 bits)
+    char startDist; // shortest distance in number of nodes from start node, 8 bits
+    char walls; // walls (low 4 bits), number of traversals (middle 3 bits), whether or not it's a dead end (high 1 bit)
+                // walls: right (bit 0), down (bit 1), left (bit 2), up (bit 3)
 
   public:
-    /* Constructor function takes in coordinates (coorX and coorY), a manhattan distance,
-      and an array walls of booleans in the order: 
-      [positiveX, positiveY, negativeX, negativeY] or [Right, Down, Left, Up].
-      
-      Right now, all arguments are required though in the future, can write 
-      the class so that walls, for example, if NULL will simply be set so that
-      no walls exist 
-
-      Old constructor: MazeNode(int coorX, int coorY, int manDist, bool newWalls[]);
-    */
-    void setValues(int coorX, int coorY, double manDist, int startingDist, bool newWalls[]);
+    void setValues(char inCoords, char inManhattanDist, char inStartDist, char inWalls);
 
     /* Returns x coordinate */
-    int getXCoor();
+    char getXCoor();
 
     /* Returns y coordinate */
-    int getYCoor();
+    char getYCoor();
 
     /* Returns node's score (sum of manhattan and number of traversals) */
-    double getScore();
+    float getScore();
 
     /* Returns Manhattan distance */
-    double getManhattanDist();
+    float getManhattanDist();
 
     /* Returns start distance */
-    int getStartDist();
+    char getStartDist();
 
     /* Returns number of traversals of this node in finding the path */
-    int getNumOfTraversals();
+    char getNumOfTraversals();
     
     /* Returns whether or not there is a wall in the indicated direction */
     bool hasWall(enum Direction dir);
 
-    /* Update the walls of the node */
-    void updateWalls(bool newWalls[]);
+    /* Walls should be low four bits */
+    void updateWalls(char newWalls);
 
     /* Increments the number of traversals. Cannot directly set the number 
        of traversals because such an action is too dangerous and does not 
@@ -84,16 +64,15 @@ class MazeNode {
     void incrementNumOfTraversals();
 
     /* Changes start distcance */
-    void setStartDist(int dist);
+    void setStartDist(char newStartDist);
 
-    int getNumOfOpenWalls();
+    char getNumOfOpenWalls();
 
     bool shouldTraverse();
 
     void markDeadEnd();
 
     bool isDeadEnd();
-
 };
 
 #endif

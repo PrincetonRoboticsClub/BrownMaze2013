@@ -17,122 +17,87 @@
 ******************************************************************************/
 
 
-// when f's are equal, compare h values
-// http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html
-
 #include <stdlib.h>
-#include <assert.h>
-#include <stdio.h>
 #include "MazeNode.h"
+#include <math.h>
 
-/* Constructor function takes in coordinates (coorX and coorY), a manhattan distance,
-   and an array walls of booleans in the order: 
-   [positiveX, positiveY, negativeX, negativeY] or [Right, Down, Left, Up].
+// enum Direction {UP = 1, DOWN = -1, RIGHT = 2, LEFT = -2};
 
-   Right now, all arguments are required though in the future, can write 
-   the class so that walls, for example, if NULL will simply be set so that
-   no walls exist */
-void MazeNode::setValues(int coorX, int coorY, double manDist, int startingDist, bool newWalls[]) {
-   assert(coorX >= 0);
-   assert(coorY >= 0);
-   assert(manDist >= 0);
-
-   xCoor = coorX; // horizontal coordinate with zero at left
-   yCoor = coorY; // vertical coordinate with zero at top 
-   manhattanDist = manDist; // sum of differences of x coordinates and y coordinates from target node
-   startDist = startingDist; // shortest distance in number of nodes from start node
-
-   walls.posX = newWalls[0];
-   walls.posY = newWalls[1];
-   walls.negX = newWalls[2];
-   walls.negY = newWalls[3];
-
-   numOfTraversals = 0; // number of times node crossed in finding a sucessful path
+void MazeNode::setValues(char inCoords, char inStartDist, char inWalls) {
+   coords = inCoords; 
+   startDist = inStartDist; 
+   walls = inWalls; 
 }
 
-/* Returns x coordinate */
-int MazeNode::getXCoor() {
-   return xCoor;
+char MazeNode::getXCoor() {
+   return (0x0F & coords);
 }
 
-/* Returns y coordinate */
-int MazeNode::getYCoor() {
-   return yCoor;
+char MazeNode::getYCoor() {
+   return (0xF0 & coords);
 }
 
-/* Returns node's score (sum of manhattan and number of traversals) */
-double MazeNode::getScore() {
-   return 4.0001*manhattanDist + 0.9999*startDist + 4.0000*numOfTraversals;
+float MazeNode::getScore(float a, float b) {
+   // 4.0001*manhattanDist + 0.9999*startDist + 4.0000*numOfTraversals
+   return 4.0001*getManhattanDist(a, b) + 0.9999*((int) startDist) + 4.0000*((int) (0x70 & walls));
 }
 
-//    return 0.9999*manhattanDist + 1.0001*startDist + 4.0001*numOfTraversals;
-
-
-/* Returns Manhattan distance */
-double MazeNode::getManhattanDist() {
-   return manhattanDist;
+float MazeNode::getManhattanDist(float a, float b) {
+   return abs(((int) getXCoor()) - a) + abs(((int) getYCoor()) - b);
 }
 
-/* Returns starting distance */
-int MazeNode::getStartDist() {
+char MazeNode::getStartDist() {
    return startDist;
 }
 
-/* Returns number of traversals of this node in finding the path */
-int MazeNode::getNumOfTraversals() {
-   return numOfTraversals;
+char MazeNode::getNumOfTraversals() {
+   return (0x07 & (walls >> 4));
 }
 
-/* Returns whether or not there is a right/positive X wall */
-bool MazeNode::hasWall(enum Direction dir) {
+bool MazeNode::hasWall(int dir) {
    switch (dir) {
-      case RIGHT: return walls.posX;
-      case LEFT: return walls.negX;
-      case DOWN: return walls.posY;
-      case UP: return walls.negY;
+      case 2: return (0x01 & walls);
+      case -1: return (0x01 & (walls >> 1));
+      case -2: return (0x01 & (walls >> 2));
+      case 1: return (0x01 & (walls >> 3));
       default: assert(false);
    }
-   return walls.posX;
 }
 
-/* Update the walls of the node */
-void MazeNode::updateWalls(bool newWalls[]) {
-   walls.posX = newWalls[0];
-   walls.posY = newWalls[1];
-   walls.negX = newWalls[2];
-   walls.negY = newWalls[3];
+// 0 000 ULDR
+void MazeNode::updateWalls(char newWalls) {
+   newWalls << 4;
+   newWalls >> 4; // clearing higher bits
+
+   walls = (walls & 0xF0) || newWalls;
 }
 
-/* Increments the number of traversals. Cannot directly set the number 
-   of traversals because such an action is too dangerous and does not 
-   make sense. */
 void MazeNode::incrementNumOfTraversals() {
-   numOfTraversals++;
+   walls += 0x10;
 }
 
-/* Changes start distcance */
-void MazeNode::setStartDist(int dist) {
-   startDist = dist;
+void MazeNode::setStartDist(char newStartDist) {
+   startDist = newStartDist;
 }
 
-int MazeNode::getNumOfOpenWalls() {
-   int num = 0;
-   if (!(walls.posX)) num++;
-   if (!(walls.negX)) num++;
-   if (!(walls.negY)) num++;
-   if (!(walls.posY)) num++;
+char MazeNode::getNumOfOpenWalls() {
+   char num = 0;
+   for (int i = 0; i < 4; i++) {
+      num += (walls >> i) & 0x01
+   }
    return num;
 }
 
+// STOPPED
 bool MazeNode::shouldTraverse() {
-   return (!deadEnd && numOfTraversals < getNumOfOpenWalls());
+   // return (!deadEnd && numOfTraversals < getNumOfOpenWalls());
+   return (!isDeadEnd() && ((int) getNumOfTraversals() < (int) getNumOfOpenWalls()))
 }
 
 void MazeNode::markDeadEnd() {
-   deadEnd = true;
+   walls = walls | 0x80;
 }
 
 bool MazeNode::isDeadEnd() {
-   return deadEnd;
+   return walls & 0x80;
 }
-
