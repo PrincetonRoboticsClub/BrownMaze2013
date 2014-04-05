@@ -30,14 +30,21 @@ PID::PID(double k[3]){
 double PID::compute(double input, double setPoint){
   double error = setPoint - input;
   int temp = millis();
-  double dt=(double) (temp-lastT);    
+  double dt=(double) (temp-lastT);
+  if (dt > 1000) { dt = 0; }
   
   iTerm += (ki * error * dt/1000.0);
   
   if(iTerm > outMax){ iTerm= outMax; }
   else { if(iTerm < outMin){ iTerm= outMin; } }
   
-  double dInput = input - lastInput;
+  double dInput;
+  if (justReset) {
+    dInput = 0;
+  }
+  else {
+    dInput = input - lastInput;
+  }
 
   double output = kp*error + iTerm - kd*dInput;     
   if(output > outMax){ output = outMax; }
@@ -56,6 +63,7 @@ void PID::reset(){
   iTerm=0;
   lastT=millis();
   lastInput=0;
+  justReset = true;
 }
 void PID::setConstants(double p,double i,double d){
   kp=p; ki=i; kd=d;
