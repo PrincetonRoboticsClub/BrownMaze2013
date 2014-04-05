@@ -26,17 +26,17 @@
 #define PIN_ERB 10
 
 /** Robot Dimenion Definitions (cm or cm/s) **/
-#define WHEEL_RADIUS 2.0f
-#define WHEEL_BASE 10.0f
+#define WHEEL_RADIUS 2.0f // 2.0
+#define WHEEL_BASE 10.3f // 10.3
 #define MAX_SPEED 70.0f // 70.0 is the real max
 
 #define COUNT_PER_REV 1200
 #define TIMEOUT 10000
 
 /** PID Constants **/
-#define TANK_I_GAIN 0.03
-#define POS_P_GAIN 0.025
-#define ANGLE_P_GAIN 0.135
+#define TANK_I_GAIN 0.05
+#define POS_P_GAIN 0.024
+#define ANGLE_P_GAIN 0.14
 #define ANGLE_I_GAIN 0.00
 #define ANGLE_D_GAIN 0.00
 #define DANGLE_P_GAIN 0.9
@@ -124,36 +124,117 @@ void loop() {
   r->changeSetX(-TILE_LENGTH);
   r->waitForNext(INSTRUCTION_DELAY);
   r->changeSetX(-TILE_LENGTH);
-  r->waitForNext();
+  r->waitForNext(INSTRUCTION_DELAY);
+  //turn left
+  r->changeSetAngle(-PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // forward 3 tiles
+  r->changeSetY(TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetY(TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetY(TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // turn left
+  r->changeSetAngle(-PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // forward 3
+  r->changeSetX(TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetX(TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetX(TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // turn left
+  r->changeSetAngle(-PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // forward 2
+  r->changeSetY(-TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetY(-TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // turn left
+  r->changeSetAngle(-PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // forward 1
+  r->changeSetX(-TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // turn right 2
+  r->changeSetAngle(PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetAngle(PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // forward 1
+  r->changeSetX(TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // turn left
+  r->changeSetAngle(-PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // forward 1
+  r->changeSetY(-TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // turn right
+  r->changeSetAngle(PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // forward 1
+  r->changeSetX(TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // turn left
+  r->changeSetAngle(-PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // forward 1
+  r->changeSetY(-TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // turn left
+  r->changeSetAngle(-PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // forward 5
+  r->changeSetX(-TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetX(-TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetX(-TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetX(-TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetX(-TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  // turn right 2
+  r->changeSetAngle(PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetAngle(PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
   // done
-  r->wait(1000000);
+  //r->wait(1000000);
   */
 
   //r->waitForNext(INSTRUCTION_DELAY);
   //r->changeSetAngle(PI/2);
 
+  
   // move in a square
-  //r->waitForNext(INSTRUCTION_DELAY);
-  //r->changeSetX(TILE_LENGTH);
-  //r->waitForNext(INSTRUCTION_DELAY);
-  //r->changeSetAngle(PI/2);
-  //r->waitForNext(INSTRUCTION_DELAY);
-  //r->changeSetY(TILE_LENGTH);
-  //r->waitForNext(INSTRUCTION_DELAY);
-  //r->changeSetAngle(PI/2);
-  //r->waitForNext(INSTRUCTION_DELAY);
-  //r->changeSetX(-TILE_LENGTH);
-  //r->waitForNext(INSTRUCTION_DELAY);
-  //r->changeSetAngle(PI/2);
-  //r->waitForNext(INSTRUCTION_DELAY);
-  //r->changeSetY(-TILE_LENGTH);
-  //r->waitForNext(INSTRUCTION_DELAY);
-  //r->changeSetAngle(PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetX(TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetAngle(PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetY(TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetAngle(PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetX(-TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetAngle(PI/2);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetY(-TILE_LENGTH);
+  r->waitForNext(INSTRUCTION_DELAY);
+  r->changeSetAngle(PI/2);
+  
 
   // run in a straight line forever! - square by square
-  r->waitForNext(INSTRUCTION_DELAY);
-  Serial.println("changed x");
-  r->changeSetX(TILE_LENGTH);
+  //r->waitForNext(INSTRUCTION_DELAY);
+  //Serial.println("changed x");
+  //r->changeSetX(TILE_LENGTH);
 
   //r->update(); // for code in setup
   //printData();

@@ -100,6 +100,8 @@
    void changeSetY(float dy); // change target y by dy
    void changeSetAngle(float da); // change target angle by da
 
+   uint8_t getDirection();
+
    //void doInstructions(Instruction* instructions);
  };
 #endif
