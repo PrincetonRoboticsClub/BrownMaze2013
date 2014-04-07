@@ -15,52 +15,63 @@
 
 int main(void) {
    /******************************* MazeNode *******************************/
-   /*printf("-----------------------------------------------------------\n");
+   printf("-----------------------------------------------------------\n");
    printf("TESTING MAZENODE\n");
-   bool w[4] = {false, false, false, false};
    MazeNode test1;
-   test1.setValues(0, 0, 0, 0, w);
+   test1.setValues(0, 0, 1, 0x00);
    assert(test1.getXCoor() == 0);
    assert(test1.getYCoor() == 0);
-   assert(test1.getScore() == 0);
-   assert(test1.getManhattanDist() == 0);
+   assert(test1.getManhattanDist(7.5, 7.5) == 15.0);
+   assert(test1.getStartDist() == 1);
    assert(test1.getNumOfTraversals() == 0);
-   assert(!test1.hasWall(RIGHT));
-   assert(!test1.hasWall(DOWN));
-   assert(!test1.hasWall(LEFT));
-   assert(!test1.hasWall(UP));
-   
+   // assert(test1.getScore(7.5, 7.5) == (float) 61.001400);
+   assert(!test1.hasWall(2));
+   assert(!test1.hasWall(-1));
+   assert(!test1.hasWall(-2));
+   assert(!test1.hasWall(1));
+   assert(test1.getNumOfOpenWalls() == 4);
+   assert(!test1.isDeadEnd());
+
    test1.incrementNumOfTraversals();
    test1.incrementNumOfTraversals();
+   bool w[4];
    w[0] = true;
    w[1] = true;
    w[2] = true;
    w[3] = true;
    test1.updateWalls(w);
    
-   assert(test1.getScore() == 0);
-   assert(test1.getManhattanDist() == 0);
+   assert(test1.getManhattanDist(7.5, 7.5) == 15);
    assert(test1.getNumOfTraversals() == 2);
-   assert(test1.hasWall(RIGHT));
-   assert(test1.hasWall(DOWN));
-   assert(test1.hasWall(LEFT));
-   assert(test1.hasWall(UP));
+   assert(test1.getStartDist() == 1);
+   // assert(test1.getScore(7.5, 7.5) == (float) (69.0014));
+   assert(test1.hasWall(2));
+   assert(test1.hasWall(-1));
+   assert(test1.hasWall(-2));
+   assert(test1.hasWall(1));
+   assert(test1.getNumOfOpenWalls() == 0);
+   assert(!test1.isDeadEnd());
    
    w[1] = false;
    w[3] = false;
    MazeNode test2;
-   test2.setValues(10, 3, 2, 17, w);
+   test2.setValues(10, 3, 17, 0x05);
    assert(test2.getXCoor() == 10);
    assert(test2.getYCoor() == 3);
-   assert(test2.getScore() == 1.001*2 + 17);
-   assert(test2.getManhattanDist() == 2);
+   // assert(test2.getScore(7.5, 7.5) == (float) (4.0001*7 + 0.9999*17 + 4.0000*0));
+   assert(test2.getManhattanDist(7.5, 7.5) == 7);
+   assert(test2.getStartDist() == 17);
    assert(test2.getNumOfTraversals() == 0);
-   assert(test2.hasWall(RIGHT));
-   assert(!test2.hasWall(DOWN));
-   assert(test2.hasWall(LEFT));
-   assert(!test2.hasWall(UP));
+   assert(test2.hasWall(2));
+   assert(!test2.hasWall(-1));
+   assert(test2.hasWall(-2));
+   assert(!test2.hasWall(1));
+   assert(test2.getNumOfOpenWalls() == 2);
+   assert(!test2.isDeadEnd());
+   test2.markDeadEnd();
+   assert(test2.isDeadEnd());
    
-   /********************************* Maze *********************************/
+   /********************************* Maze ********************************
    
    /****** TESTING BASIC MAZE OPERATIONS ******/
    /*printf("-----------------------------------------------------------\n");
@@ -71,11 +82,11 @@ int main(void) {
       for (int j = 0; j < 15; j++) {
          assert((*test3.getNode(i, j)).getXCoor() == i);
          assert((*test3.getNode(i, j)).getYCoor() == j);
-         assert((*test3.getNode(i, j)).getManhattanDist() == abs(i - 15) + abs(j - 14));
-         assert((*test3.getNode(i, j)).hasWall(RIGHT) == false);
-         assert((*test3.getNode(i, j)).hasWall(LEFT) == false);
-         assert((*test3.getNode(i, j)).hasWall(UP) == false);
-         assert((*test3.getNode(i, j)).hasWall(DOWN) == false);
+         assert((*test3.getNode(i, j)).getManhattanDist(7.5, 7.5) == abs(i - 15) + abs(j - 14));
+         assert((*test3.getNode(i, j)).hasWall(2) == false);
+         assert((*test3.getNode(i, j)).hasWall(-2) == false);
+         assert((*test3.getNode(i, j)).hasWall(1) == false);
+         assert((*test3.getNode(i, j)).hasWall(-1) == false);
          assert((*test3.getNode(i, j)).getNumOfTraversals() == 0);
          (*test3.getNode(i, j)).incrementNumOfTraversals();
          assert((*test3.getNode(i, j)).getNumOfTraversals() == 1);
@@ -176,9 +187,9 @@ int main(void) {
       }
    }
 
-   test5.setValues(width, height, 0, 15, 7.5, 7.5);
+   test5.setValues(0, 15);
 
-   test5.applyMazeWalls(g, width, height);
+   test5.applyMazeWalls(g);
 
    test5.applyAStarAlgorithm();
 
@@ -187,26 +198,26 @@ int main(void) {
    for (int j = 0; j < 16; j++) {
       for (int i = 0; i < 16; i++) {
          const char *a;
-         if ((test5.getNode(i, j))->hasWall(UP)) a = " -- ";
+         if ((test5.getNode(i, j))->hasWall(1)) a = " -- ";
          else a = "    ";
          printf("%s", a);
       }
       printf("\n");
       for (int i = 0; i < 16; i++) {
          const char *a, *b;
-         if ((test5.getNode(i, j))->hasWall(LEFT)) a = "|";
+         if ((test5.getNode(i, j))->hasWall(-2)) a = "|";
          else a = " ";
          printf("%s%2d ", a, (test5.getNode(i, j))->getNumOfTraversals());
          nums += (test5.getNode(i, j))->getNumOfTraversals();
 
-         if (i == 15 && (test5.getNode(i, j))->hasWall(RIGHT))
+         if (i == 15 && (test5.getNode(i, j))->hasWall(2))
             printf("|");;
       }
       printf("\n");
       if (j == 15) {
          for (int i = 0; i < 16; i++) {
             const char *a;
-            if ((test5.getNode(i, j))->hasWall(DOWN)) 
+            if ((test5.getNode(i, j))->hasWall(-1)) 
                printf(" -- ");
             else 
                printf("    ");
@@ -219,25 +230,25 @@ int main(void) {
    for (int j = 0; j < 16; j++) {
       for (int i = 0; i < 16; i++) {
          const char *a;
-         if ((test5.getNode(i, j))->hasWall(UP)) a = " -- ";
+         if ((test5.getNode(i, j))->hasWall(1)) a = " -- ";
          else a = "    ";
          printf("%s", a);
       }
       printf("\n");
       for (int i = 0; i < 16; i++) {
          const char *a, *b;
-         if ((test5.getNode(i, j))->hasWall(LEFT)) a = "|";
+         if ((test5.getNode(i, j))->hasWall(-2)) a = "|";
          else a = " ";
-         printf("%s%2.f ", a, (test5.getNode(i, j))->getManhattanDist());
+         printf("%s%2.f ", a, (test5.getNode(i, j))->getManhattanDist(7.5, 7.5));
 
-         if (i == 15 && (test5.getNode(i, j))->hasWall(RIGHT))
+         if (i == 15 && (test5.getNode(i, j))->hasWall(2))
             printf("|");;
       }
       printf("\n");
       if (j == 15) {
          for (int i = 0; i < 16; i++) {
             const char *a;
-            if ((test5.getNode(i, j))->hasWall(DOWN)) 
+            if ((test5.getNode(i, j))->hasWall(-1)) 
                printf(" -- ");
             else 
                printf("    ");
@@ -250,25 +261,25 @@ int main(void) {
    for (int j = 0; j < 16; j++) {
       for (int i = 0; i < 16; i++) {
          const char *a;
-         if ((test5.getNode(i, j))->hasWall(UP)) a = " --- ";
+         if ((test5.getNode(i, j))->hasWall(1)) a = " --- ";
          else a = "     ";
          printf("%s", a);
       }
       printf("\n");
       for (int i = 0; i < 16; i++) {
          const char *a, *b;
-         if ((test5.getNode(i, j))->hasWall(LEFT)) a = "|";
+         if ((test5.getNode(i, j))->hasWall(-2)) a = "|";
          else a = " ";
          printf("%s%3d ", a, (test5.getNode(i, j))->getStartDist());
 
-         if (i == 15 && (test5.getNode(i, j))->hasWall(RIGHT))
+         if (i == 15 && (test5.getNode(i, j))->hasWall(2))
             printf("|");;
       }
       printf("\n");
       if (j == 15) {
          for (int i = 0; i < 16; i++) {
             const char *a;
-            if ((test5.getNode(i, j))->hasWall(DOWN)) 
+            if ((test5.getNode(i, j))->hasWall(-1)) 
                printf(" --- ");
             else 
                printf("     ");
@@ -281,25 +292,25 @@ int main(void) {
    for (int j = 0; j < 16; j++) {
       for (int i = 0; i < 16; i++) {
          const char *a;
-         if ((test5.getNode(i, j))->hasWall(UP)) a = " ----- ";
+         if ((test5.getNode(i, j))->hasWall(1)) a = " ----- ";
          else a = "       ";
          printf("%s", a);
       }
       printf("\n");
       for (int i = 0; i < 16; i++) {
          const char *a, *b;
-         if ((test5.getNode(i, j))->hasWall(LEFT)) a = "|";
+         if ((test5.getNode(i, j))->hasWall(-2)) a = "|";
          else a = " ";
-         printf("%s%5.1f ", a, (test5.getNode(i, j))->getScore());
+         printf("%s%5.1f ", a, (test5.getNode(i, j))->getScore(7.5, 7.5));
 
-         if (i == 15 && (test5.getNode(i, j))->hasWall(RIGHT))
+         if (i == 15 && (test5.getNode(i, j))->hasWall(2))
             printf("|");;
       }
       printf("\n");
       if (j == 15) {
          for (int i = 0; i < 16; i++) {
             const char *a;
-            if ((test5.getNode(i, j))->hasWall(DOWN)) 
+            if ((test5.getNode(i, j))->hasWall(-1)) 
                printf(" ----- ");
             else 
                printf("       ");
@@ -311,24 +322,22 @@ int main(void) {
    printf("Number of nodes traversed: %d\n", test5.getNumOfNodesTraversed());
    printf("Number of traversals: %d\n", nums);
    printf("Shortest path length to center node [7,7]: \n\tShould be: \t\t%d\n\tYour maze found: \t%d\n", shortlen, test5.getTargetNode()->getStartDist());
-   
+
    int size5 = 256;
-   enum Direction *path5;
-   path5 = test5.getAStarSolutionPath(&size5);
+   int path5[256];
+   test5.getAStarSolutionPath(path5, &size5);
    printf("\n\nSolution path:\n");
    for (int m = 0; m < size5; m++) {
       switch (path5[m]) {
-         case RIGHT: printf("RIGHT\n"); break;
-         case LEFT: printf("LEFT\n"); break;
-         case DOWN: printf("DOWN\n"); break;
-         case UP: printf("UP\n"); break;
+         case 2: printf("RIGHT\n"); break;
+         case -2: printf("LEFT\n"); break;
+         case -1: printf("DOWN\n"); break;
+         case 1: printf("UP\n"); break;
       }
    }
    printf("\n"); 
-   test5.freeMaze();
 
 
-   // nodes that were not traversed on priority queue
    /******************************** Brain *********************************/
    printf("-----------------------------------------------------------\n");
    printf("TESTING BRAIN\n");
