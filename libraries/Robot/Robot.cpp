@@ -5,9 +5,8 @@
 #include <Arduino.h>
 
 // Fudge Factors
-#define ANGLE_DEADBAND 0.05f
-#//define ANGLE_SPD_DEADBAND 5.0f
-#define POS_DEADBAND 1.8f
+#define ANGLE_DEADBAND 0.04f
+#define POS_DEADBAND 2.2f //1.8
 
 /*** Static Functions ***/
 
@@ -102,8 +101,10 @@ Encoder* Robot::getRightEncoder() {
 
 void Robot::tank(float leftSpeed, float rightSpeed) {
 	if(sCurrentState != kManual) {
-		mLeft->writeSpeed(pLeftSpeed->compute(eLeft->getSpeed(), leftSpeed));
-		mRight->writeSpeed(pRightSpeed->compute(eRight->getSpeed(), rightSpeed));
+		float ls = pLeftSpeed->compute(eLeft->getSpeed(), leftSpeed);
+		float rs = pRightSpeed->compute(eRight->getSpeed(), rightSpeed);
+		mLeft->writeSpeed(ls);
+		mRight->writeSpeed(rs);
 	} // End if
 } // End tank(float, float)
 
@@ -138,12 +139,14 @@ void Robot::posCompute() {
 	fX     	+= ds*cos(fAngle);
 	fY		+= ds*sin(fAngle);
 	fAngle	+= eLeft->getDistancePerCount()/fWheelBase * (float)(dL-dR);
+	fAngle = angleClamp(fAngle, PI);
 }
 
 void Robot::update() {
 	posCompute(); // Update Position Variables
-	float straightOut;
-	float turnOut;
+
+	float straightOut = 0.0f;
+	float turnOut = 0.0f;
 
 	// State Machine
 	switch(sCurrentState) {
@@ -154,69 +157,87 @@ void Robot::update() {
 
 		case kMoving:
 			straightInput = euclidean(fX, fY, targetX, targetY);
-			straightOut = fMaxSpeed * pPosition->compute(-1.0f * straightInput);
 			turnInput = angleClamp(fAngle, targetAngle);
-			turnSetPoint = angleClamp(atan2(targetY-fY, targetX-fX), targetAngle);
-			//float turnSetPoint = angleClamp(atan2((targetY-fY) * (1.0f+0.1f*cos(targetAngle)), (targetX-fX) * (1.0f+0.1f*sin(targetAngle))), targetAngle);
-			turnOut = fMaxSpeed * pDriveAngle->compute(turnInput, turnSetPoint);
+			turnSetPoint = angleClamp(atan2(targetY-fY, targetX-fX), targetAngle);			
 
-			// seems to have almost no effect currently
-			//if (straightInput < (1.5f*POS_DEADBAND))
-			//	turnOut = fMaxSpeed*pDriveAngle->compute(fAngle, targetAngle);
+			// re-added haha
+			if (straightInput < (1.5f*POS_DEADBAND)) {
+				turnOut = fMaxSpeed * pDriveAngle->compute(fAngle, targetAngle);
+				straightOut = fMaxSpeed * pPosition->compute(-1.0f * straightInput);
+			}
+			else {
+				straightOut = fMaxSpeed * pPosition->compute(-1.0f * straightInput);
+				turnOut = fMaxSpeed * pDriveAngle->compute(turnInput, turnSetPoint);
+			}
 
 			if (straightInput < POS_DEADBAND) {
-				sCurrentState = kWaiting;
+				//sCurrentState = kWaiting;
+				sCurrentState = kTurning;
 				fAngle = angleClamp(fAngle, 0.0f);
+				pLeftSpeed->reset();
+				pRightSpeed->reset();
 			} else
 				arcade(straightOut, turnOut);
 			break;
 		case kTurning:
-			Serial.print(angleClamp(fAngle, targetAngle));
-			Serial.print(" -> ");
-			Serial.print(targetAngle);
-			Serial.print("  :  ");
-			Serial.print(ANGLE_DEADBAND);
-			Serial.println();
 			turnOut = fMaxSpeed*pAngle->compute(angleClamp(fAngle, targetAngle), targetAngle);
-			// having angleClamp in the next line is very important!!!
+
 			if(abs(angleClamp(fAngle, targetAngle)-targetAngle) < ANGLE_DEADBAND) {
-			//	if(getAngularSpeed() < ANGLE_SPD_DEADBAND) {
-					sCurrentState = kWaiting;
-					fAngle = angleClamp(fAngle, 0.0f);
-			//	} else {
-			//		pLeftSpeed->reset();
-			//		pRightSpeed->reset();
-			//	}
+				sCurrentState = kWaiting;
+				mLeft->brake();
+				mRight->brake();
+				fAngle = angleClamp(fAngle, 0.0f);
 			}
 			else {
 				arcade(0.0f, turnOut);
 			}
 			break;
 		case kWaiting:
-			// makes behavior smoother and gets rid of whining noise
-			mLeft->brake();
-			mRight->brake();
-
 			// prevents build up
 			pLeftSpeed->reset();
 			pRightSpeed->reset();
 
+			// makes behavior smoother and gets rid of whining noise
+			mLeft->brake();
+			mRight->brake();
+
+			//pPosition->compute(0.0);
+			//pDriveAngle->compute(0.0);
+			//pAngle->compute(0.0);
+
 			break;
 	}
+	/*
+	// actual speed
+	Serial.print(getSpeed()/70.0);
+	Serial.print(", ");
+	// target speed
+	Serial.print(straightOut/70.0);
+	Serial.print(", ");
+	// actual angular speed
+	Serial.print(getAngularSpeed()/70.0);
+	Serial.print(", ");
+	// target angular speed
+	Serial.print(turnOut/70.0);
+	Serial.print(", ");
+	// angle error
+	Serial.print((angleClamp(targetAngle - getAngle(), 0) * 180.0/PI)/180.0);
+	Serial.print("\n");
+	*/
+
 }
 
 void Robot::setSetPosition(float newX, float newY) {
 	if(sCurrentState != kManual) {
 		targetX = newX;
 		targetY = newY;
-		targetAngle = fAngle;
 		sCurrentState = kMoving;
 	}
 }
 
 void Robot::setSetAngle(float newAngle) {
 	if(sCurrentState != kManual) {
-		targetAngle = newAngle;
+		targetAngle = angleClamp(newAngle, PI);
 		fAngle = angleClamp(fAngle, PI);
 		sCurrentState = kTurning;
 	}
@@ -270,4 +291,8 @@ void Robot::changeSetY(float dy) {
 }
 void Robot::changeSetAngle(float da) {
 	setSetAngle(targetAngle + da);
+}
+
+uint8_t Robot::getDirection() {
+	return (uint8_t) targetAngle * 2.0/PI;
 }

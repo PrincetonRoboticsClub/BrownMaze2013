@@ -15,7 +15,7 @@
 #include <Arduino.h>
 #define	MOTOR_MAX	255
 
-typedef	int	pin_t;
+typedef	uint8_t	pin_t;
 
  class Motor {
  	

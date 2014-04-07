@@ -16,9 +16,6 @@ void Encoder::init(pin_t pinA, pin_t pinB, float distPerCount, int timeout, bool
   for (int i = 0; i < AVERAGE_COUNT; i++)
     fPeriod[i] = 0.0f;
   sLoopCounter = 0;
-
-  // Reset Counter
-  iCount = 0L;
 }
   
 float Encoder::getDistance(){

@@ -42,7 +42,7 @@
 #include <Arduino.h>
 
 
-typedef int pin_t;
+typedef uint8_t pin_t;
 #define AVERAGE_COUNT   6
 #define DEFAULT_TIMEOUT 100000
 

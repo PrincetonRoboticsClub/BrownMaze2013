@@ -11,7 +11,7 @@
 #define PID_h
 
 #include <Arduino.h>
- 
+
 class PID{
   public:
     PID(double p, double i, double d, double lo, double hi);
@@ -30,6 +30,8 @@ class PID{
     double iTerm;
     unsigned long lastT;
     double lastInput;
+
+    bool justReset;
 	
 	void init(double p, double i, double d, double lo, double hi);
 };
