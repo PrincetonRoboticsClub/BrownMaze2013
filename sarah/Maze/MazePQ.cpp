@@ -23,19 +23,15 @@ void MazePQ::exch(int a, int b) {
 	heap[b] = temp;
 }
 
-bool MazePQ::nodeGreater(int a, int b) {
-	// test if a is greater than b
-	// if (heap[a]->getScore(7.5, 7.5) > heap[b]->getScore(7.5, 7.5))
-	// 	return true;
-	// else if (heap[a]->getScore(7.5, 7.5) == heap[b]->getScore(7.5, 7.5) 
-	// 	&& heap[a]->getManhattanDist(7.5, 7.5) > heap[b]->getManhattanDist(7.5, 7.5))
-	// 	return true;
+float MazePQ::getNodeWeightedScore(MazeNode *n) {
+	return 4*n->getManhattanDist(7.5, 7.5) + 2*n->getNumOfTraversals();
+}
 
-	// SARAH make it so that the heap returns the one with the start distance closest to the reference node (the node currently being worked on)
-	if (heap[a]->getScore(7.5, 7.5) > heap[b]->getScore(7.5, 7.5))
+bool MazePQ::nodeGreater(int a, int b) {
+	if (getNodeWeightedScore(heap[a]) > getNodeWeightedScore(heap[b]))
 		return true;
-	else if (heap[a]->getScore(7.5, 7.5) == heap[b]->getScore(7.5, 7.5) 
-		&& heap[a]->getManhattanDist(7.5, 7.5) > heap[b]->getManhattanDist(7.5, 7.5))
+	else if (getNodeWeightedScore(heap[a]) == getNodeWeightedScore(heap[b]) 
+		&& heap[a]->getNumOfTraversals() > heap[b]->getNumOfTraversals())
 		return true;
 
 	// if all tied or less than, returns false
@@ -83,4 +79,11 @@ int MazePQ::getSize() {
 	return N;
 }
 
+void MazePQ::removeLowest() {
+	N--;
+}
+
+MazeNode *MazePQ::peekLowest() {
+	return heap[N];
+}
 

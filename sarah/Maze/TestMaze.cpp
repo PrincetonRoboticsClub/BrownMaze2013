@@ -288,37 +288,6 @@ int main(void) {
       }
    }
 
-   printf("\nMazeArray's Score\n\n");
-   for (int j = 0; j < 16; j++) {
-      for (int i = 0; i < 16; i++) {
-         const char *a;
-         if ((test5.getNode(i, j))->hasWall(1)) a = " ----- ";
-         else a = "       ";
-         printf("%s", a);
-      }
-      printf("\n");
-      for (int i = 0; i < 16; i++) {
-         const char *a, *b;
-         if ((test5.getNode(i, j))->hasWall(-2)) a = "|";
-         else a = " ";
-         printf("%s%5.1f ", a, (test5.getNode(i, j))->getScore(7.5, 7.5));
-
-         if (i == 15 && (test5.getNode(i, j))->hasWall(2))
-            printf("|");;
-      }
-      printf("\n");
-      if (j == 15) {
-         for (int i = 0; i < 16; i++) {
-            const char *a;
-            if ((test5.getNode(i, j))->hasWall(-1)) 
-               printf(" ----- ");
-            else 
-               printf("       ");
-         }
-         printf("\n");
-      }
-   }
-
    printf("Number of nodes traversed: %d\n", test5.getNumOfNodesTraversed());
    printf("Number of traversals: %d\n", nums);
    printf("Shortest path length to center node [7,7]: \n\tShould be: \t\t%d\n\tYour maze found: \t%d\n", shortlen, test5.getTargetNode()->getStartDist());

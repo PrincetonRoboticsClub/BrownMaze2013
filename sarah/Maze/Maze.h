@@ -26,8 +26,7 @@ class Maze {
 
    char numTraversed; // only necessary for testing, 8 bits
    bool solutionFound; // whether or not a successful path has been found, only necessary for testing
-   MazePQ q;
-
+   char mostInner;
 
   public:
    void setValues(char startX, char startY);
@@ -78,6 +77,10 @@ class Maze {
    void applyMazeWalls(bool newwalls[16][16][4]);
 
    void updateStartDistances(int x, int y);
+
+   MazeNode *getMostInnerTraversed();
+
+   void updateMostInner();
 
    /* directions: {UP = 1, DOWN = -1, RIGHT = 2, LEFT = -2}; */
    bool hasBetterScore(int dir, int x, int y, float score, MazeNode *next);

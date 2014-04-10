@@ -9,6 +9,7 @@ class MazePQ {
    private:
 		MazeNode **heap;
 		int N;
+		
 		void exch(int a, int b);
 		bool nodeGreater(int a, int b);
 		void promote(int k);
@@ -21,6 +22,9 @@ class MazePQ {
 		MazeNode *peek();
 		MazeNode *pop();
 		void freePQ();
+		void removeLowest();
+		MazeNode *peekLowest();
+		float getNodeWeightedScore(MazeNode *n);
 };
 
 #endif

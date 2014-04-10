@@ -63,10 +63,10 @@ void Maze::setValues(char startX, char startY) {
    nodeStart = ((0x00 | startY) << 4) | startX; // x coord is lower 4 bits, y coord is upper 4 bits
    currentPosition = nodeStart; // x coord is lower 4 bits, y coord is upper 4 bits 
    numTraversed = 0x00; // only necessary for testing, 8 bits
+   mostInner = nodeStart;
    
    (mazeArray[getArrayIndex(startX, startY)]).setStartDist(0);
 
-   q.setValues(256);
 }
 
 /* Returns the number of nodes traversed */
@@ -176,9 +176,9 @@ void Maze::updateStartDistances(int x, int y) {
    for (int j = -2; j <=2; j++) {
       if (j != 0) {
          if (canTravel(x, y, j)) {
-            if (getDirectionNode(x, y, j)->getNumOfTraversals() == 0) q.push(getDirectionNode(x, y, j));
-            if (tracker->getStartDist() + 1 < getDirectionNode(x, y, j)->getStartDist())
+            if (tracker->getStartDist() + 1 < getDirectionNode(x, y, j)->getStartDist()) {
                updateStartDistances(getDirectionNode(x, y, j)->getXCoor(), getDirectionNode(x, y, j)->getYCoor());
+            }
          }
       }
    }
@@ -295,10 +295,10 @@ MazeNode *Maze::nextNodeAStar() {
       }
    }
 
+
    if (current == next) {
-      do {
-         next = q.pop();
-      } while (next->getNumOfTraversals() != 0);
+      updateMostInner();
+      next = getMostInnerTraversed();
    }
    
    // use another mazenode variable to make sure it only goes in directions it has not gone before
@@ -324,6 +324,30 @@ void Maze::applyAStarAlgorithm() {
       nextNodeAStar();
    }
    return;
+}
+
+void Maze::updateMostInner() {
+   int lowM = 1000;
+   int nx;
+   int ny;
+   for (int i = 0; i < 16; i++) {
+      for (int j = 0; j < 16; j++) {
+         if (getNode(i, j)->getNumOfTraversals() > 0 && getNode(i, j)->shouldTraverse()) {
+            if (getNode(i, j)->getManhattanDist(7.5, 7.5) < lowM) {
+               nx = i;
+               ny = j;
+               lowM = getNode(i, j)->getManhattanDist(7.5, 7.5);
+            }
+         }
+      }
+   }
+   mostInner = ((0x00 | ny) << 4) | nx;
+}
+
+MazeNode *Maze::getMostInnerTraversed() {
+   MazeNode *n = getNode(0x000F & mostInner, (0x00F0 & mostInner) >> 4);
+   updateMostInner();
+   return n;
 }
 
 void Maze::applyMazeWalls(bool newwalls[][16][4]) {
