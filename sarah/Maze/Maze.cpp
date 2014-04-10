@@ -323,7 +323,6 @@ void Maze::applyAStarAlgorithm() {
       }
       nextNodeAStar();
    }
-   return;
 }
 
 void Maze::updateMostInner() {
@@ -359,3 +358,14 @@ void Maze::applyMazeWalls(bool newwalls[][16][4]) {
    return;
 } 
 
+int Maze::isAdjacent(int x, int y, int a, int b) {
+   if (x - a == 1 && y - b == 0)
+      return -2;
+   if (x - a == -1 && y - b == 0)
+      return 2;
+   if (x - a == 0 && y - b == 1)
+      return -1;
+   if (x - a == 0 && y - b == -1) 
+      return 1;
+   return 0;
+}

@@ -12,7 +12,6 @@
 #ifndef MAZE_H
 #define MAZE_H
 
-#include "MazePQ.h"
 #include "MazeNode.h"
 #include <vector>
 
@@ -84,6 +83,9 @@ class Maze {
 
    /* directions: {UP = 1, DOWN = -1, RIGHT = 2, LEFT = -2}; */
    bool hasBetterScore(int dir, int x, int y, float score, MazeNode *next);
+
+   int isAdjacent(int x, int y, int a, int b);
+
 };
 
 #endif

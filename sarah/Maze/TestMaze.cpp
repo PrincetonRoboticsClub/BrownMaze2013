@@ -11,6 +11,7 @@
 #include <assert.h>
 #include "MazeNode.h"
 #include "Maze.h"
+#include "Brain.h"
 #include <math.h>
 
 int main(void) {
@@ -189,9 +190,15 @@ int main(void) {
 
    test5.setValues(0, 15);
 
-   test5.applyMazeWalls(g);
+   // test5.applyMazeWalls(g);
 
-   test5.applyAStarAlgorithm();
+   // test5.applyAStarAlgorithm();
+   Brain b;
+   b.setValues();
+   b.getMaze()->setValues(0,15);
+   b.getMaze()->applyMazeWalls(g);
+   b.solveMaze();
+   test5 = *b.getMaze();
 
    int nums = 0;
    printf("\nMazeArray's Number of Traversals\n\n");
@@ -310,7 +317,47 @@ int main(void) {
    /******************************** Brain *********************************/
    printf("-----------------------------------------------------------\n");
    printf("TESTING BRAIN\n");
-   return 0;
+
+   int lengthb;
+   int pathb[256];
+
+
+   b.getPath(2, 2, 14, 11, &lengthb, pathb);
+   printf("\nPath from (2,2) to (14,11): %d\n", lengthb);
+   for (int m = 0; m < lengthb; m++) {
+      switch (pathb[m]) {
+         case 2: printf("RIGHT\n"); break;
+         case -2: printf("LEFT\n"); break;
+         case -1: printf("DOWN\n"); break;
+         case 1: printf("UP\n"); break;
+      }
+   }
+   printf("\n"); 
+
+   b.getPathToStart(&lengthb, pathb, b.getMaze()->getNode(2, 2));
+   printf("\n\nPath from (2,2) to Start %d\n", b.getMaze()->getNode(2, 2)->getStartDist());
+   for (int m = 0; m < lengthb; m++) {
+      switch (pathb[m]) {
+         case 2: printf("RIGHT\n"); break;
+         case -2: printf("LEFT\n"); break;
+         case -1: printf("DOWN\n"); break;
+         case 1: printf("UP\n"); break;
+      }
+   }
+   printf("\n"); 
+
+   b.getPathFromStart(&lengthb, pathb, b.getMaze()->getNode(2, 2));
+   printf("\n\nPath from start to (2,2)%d\n", lengthb);
+   for (int m = 0; m < lengthb; m++) {
+      switch (pathb[m]) {
+         case 2: printf("RIGHT\n"); break;
+         case -2: printf("LEFT\n"); break;
+         case -1: printf("DOWN\n"); break;
+         case 1: printf("UP\n"); break;
+      }
+   }
+   printf("\n"); 
+
 
    /* Make a random maze */
 
@@ -321,5 +368,6 @@ int main(void) {
    /* Find shortest paths */
 
    /* Display path visually */
+   return 0;
 
 }
