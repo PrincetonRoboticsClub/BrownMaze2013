@@ -335,7 +335,7 @@ int main(void) {
    printf("\n"); 
 
    b.getPathToStart(&lengthb, pathb, b.getMaze()->getNode(2, 2));
-   printf("\n\nPath from (2,2) to Start %d\n", b.getMaze()->getNode(2, 2)->getStartDist());
+   printf("\n\nPath from (2,2) to Start \n");
    for (int m = 0; m < lengthb; m++) {
       switch (pathb[m]) {
          case 2: printf("RIGHT\n"); break;
@@ -347,7 +347,7 @@ int main(void) {
    printf("\n"); 
 
    b.getPathFromStart(&lengthb, pathb, b.getMaze()->getNode(2, 2));
-   printf("\n\nPath from start to (2,2)%d\n", lengthb);
+   printf("\n\nPath from start to (2,2)\n");
    for (int m = 0; m < lengthb; m++) {
       switch (pathb[m]) {
          case 2: printf("RIGHT\n"); break;
@@ -357,7 +357,8 @@ int main(void) {
       }
    }
    printf("\n"); 
-
+   
+   b.travelSolutionPath();
 
    /* Make a random maze */
 

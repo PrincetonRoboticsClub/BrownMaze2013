@@ -52,13 +52,18 @@ void Brain::setReset() {
 void Brain::travelPath(int *length, int path[]) {
 	int dir;
 	int m;
+
 	for (int i = 0; i < *length; ) {
 		dir = path[i];
 		m = 1;
-		while (i < *length - 1 && path[++i] == dir) {
+		i++;
+		// printf("%d %d\n", i, *length - 1);
+		while (i < *length && path[i] == dir) {
 			m++;
+			i++;
 		}
-		// drive(int dir, int num);
+		// drive(dir, m);
+		printf("driving %d %d\n", dir, m);
 	}
 }
 
@@ -93,7 +98,6 @@ void Brain::getPath(int fromX, int fromY, int toX, int toY, int *length, int *pa
 			break;
 		}
 	}
-	printf("common dist %d\n", commonDist);
 
 	*length = (length2 - commonDist) + (length1 - commonDist);
 
@@ -213,7 +217,7 @@ void Brain::travelSolutionPath() {
 
 	maz.getAStarSolutionPath(path, &length);
 
-	travelPath(path, &length);
+	travelPath(&length, path);
 }
 
 Maze *Brain::getMaze() {
