@@ -105,6 +105,6 @@
 
    float getAngleToTarget(float distance);
 
-   //void doInstructions(Instruction* instructions);
+	void moveDirection(int direction, uint8_t n);
  };
 #endif

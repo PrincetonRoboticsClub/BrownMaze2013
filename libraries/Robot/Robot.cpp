@@ -377,3 +377,39 @@ float Robot::getAngleToTarget(float distance) {
   }
   return 0.0; // never get here
 }
+
+#define TILE_LENGTH 0
+#define INSTR_DELAY 0
+
+void Robot::moveDirection(int direction, uint8_t n) {
+	switch(n) {
+	case 0:
+		setSetAngle(0);
+		waitForNext(INSTR_DELAY);
+		r->changeSetX((float)n*TILE_LENGTH);
+		waitForNext(INSTR_DELAY);
+		break;
+	case 1:
+		setSetAngle(0);
+		waitForNext(INSTR_DELAY);
+		r->changeSetY((float)n*TILE_LENGTH);
+		waitForNext(INSTR_DELAY);
+		break;
+	case 2:
+		setSetAngle(0);
+		waitForNext(INSTR_DELAY);
+		r->changeSetX((float)n*TILE_LENGTH*(-1.0f));
+		waitForNext(INSTR_DELAY);
+		break;
+	case 3:
+		setSetAngle(0);
+		waitForNext(INSTR_DELAY);
+		r->changeSetY((float)n*TILE_LENGTH*(-1.0f));
+		waitForNext(INSTR_DELAY);
+		break;
+	default:
+		break;
+	}
+}
+
+
