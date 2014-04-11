@@ -5,12 +5,16 @@
 #include "MazeNode.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include "Robot.h"
+#include "WallSensor.h"
 
 class Brain {
 	private:
 		bool reset;
 		bool solved;
 		Maze maz;
+		Robot *r;
+		WallSensor *ws;
 
 	public:
 		void setValues(); //
@@ -21,7 +25,7 @@ class Brain {
 
 		void travelPath(int *length, int path[]);
 
-		void moveDir(int dir);
+		int getRobotDir(int dir);
 
 		void getPath(int fromX, int fromY, int toX, int toY, int *length, int *path); //
 

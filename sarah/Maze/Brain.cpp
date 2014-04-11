@@ -1,10 +1,12 @@
 #include "Brain.h"
 #include <math.h>
 
-void Brain::setValues() {
+void Brain::setValues(Robot *in, WallSensor *wsin) {
 	maz.setValues(0, 15);
 	solved = false;
 	reset = false;
+	r = in;
+	ws = wsin;
 }
 
 void Brain::solveMaze() {
@@ -34,7 +36,7 @@ void Brain::solveMaze() {
 		next = maz.nextNodeAStar();
 
 		if (dir = maz.isAdjacent(x, y, next->getXCoor(), next->getYCoor())) {
-			// moveDir(dir);
+			r->moveDirection(getRobotDir(dir), m);
 		}
 		else {
 			int path[256];
@@ -51,29 +53,27 @@ void Brain::setReset() {
 
 void Brain::travelPath(int *length, int path[]) {
 	int dir;
-	int m;
+	uint8_t m;
 
 	for (int i = 0; i < *length; ) {
 		dir = path[i];
 		m = 1;
 		i++;
-		// printf("%d %d\n", i, *length - 1);
+
 		while (i < *length && path[i] == dir) {
 			m++;
 			i++;
 		}
-		// drive(dir, m);
-		printf("driving %d %d\n", dir, m);
+		r->moveDirection(getRobotDir(dir), m);
 	}
 }
 
-
-void Brain::moveDir(int dir) {
+int Brain::getRobotDir(int dir) {
 	switch(dir) {
-		// case -2: drive(west); break;
-		// case -1: drive(south); break;
-		// case 1: drive(north); break;
-		// case 2: drive(east); break;
+		case -2: return 2;
+		case -1: return 1;
+		case 1: return 3;
+		case 2: return 0;
 	}
 }
 
@@ -197,18 +197,7 @@ void Brain::getPathFromStart(int *length, int path[], MazeNode* n) {
 
 
 void Brain::getWalls() {
-	// bool w[4] = {false, false, false, false};
-
-	// if (isWall(east))
-	// 	w[0] = true;
-	// if (isWall(south))
-	// 	w[1] = true;
-	// if (isWall(west))
-	// 	w[2] = true;
-	// if (isWall(north))
-	// 	w[3] = true;
-
-	// maz.getCurrentNode()->updateWalls(w);
+	maz.getCurrentNode()->updateWalls(ws->getWalls(r->getDirection()));
 }
 
 void Brain::travelSolutionPath() {
@@ -224,16 +213,16 @@ Maze *Brain::getMaze() {
 	return &maz;
 }
 
-// int main(void) {
-// 	Brain b;
-// 	b.setValues();
-// 	b.solveMaze();
+int main(void) {
+	Brain b;
+	b.setValues();
+	b.solveMaze();
 
-// 	int length = b.getMaze()->getTargetNode()->getStartDist();
-// 	int path[length];
+	int length = b.getMaze()->getTargetNode()->getStartDist();
+	int path[length];
 
-// 	b.getPathToStart(&length, path, b.getMaze()->getTargetNode());
-// 	b.travelPath(&length, path);
+	b.getPathToStart(&length, path, b.getMaze()->getTargetNode());
+	b.travelPath(&length, path);
 
-// 	b.travelSolutionPath();
-// }
+	b.travelSolutionPath();
+}
