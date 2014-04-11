@@ -5,8 +5,8 @@
 #include <Arduino.h>
 
 // Fudge Factors
-#define ANGLE_DEADBAND 0.04f
-#define POS_DEADBAND 2.2f //1.8
+#define ANGLE_DEADBAND 0.03f
+#define POS_DEADBAND 0.75f
 
 /*** Static Functions ***/
 
@@ -100,9 +100,27 @@ Encoder* Robot::getRightEncoder() {
 }
 
 void Robot::tank(float leftSpeed, float rightSpeed) {
+
+	float maxAcc = 1.0;
 	if(sCurrentState != kManual) {
-		float ls = pLeftSpeed->compute(eLeft->getSpeed(), leftSpeed);
-		float rs = pRightSpeed->compute(eRight->getSpeed(), rightSpeed);
+
+		//mLeft->writeSpeed(pLeftSpeed->compute(eLeft->getSpeed(), leftSpeed));
+		//mRight->writeSpeed(pRightSpeed->compute(eRight->getSpeed(), rightSpeed));
+		
+		float currentLeftSpeed = eLeft->getSpeed();
+		float currentRightSpeed = eRight->getSpeed();
+		/*
+		if (leftSpeed - currentLeftSpeed >  maxAcc) leftSpeed = currentLeftSpeed + maxAcc;
+		else
+		if (leftSpeed - currentLeftSpeed < -maxAcc) leftSpeed = currentLeftSpeed - maxAcc;
+
+		if (rightSpeed - currentRightSpeed >  maxAcc) rightSpeed = currentRightSpeed + maxAcc;
+		else
+		if (rightSpeed - currentRightSpeed < -maxAcc) rightSpeed = currentRightSpeed - maxAcc;
+		*/
+		float ls = pLeftSpeed->compute(currentLeftSpeed, leftSpeed);
+		float rs = pRightSpeed->compute(currentRightSpeed, rightSpeed);
+
 		mLeft->writeSpeed(ls);
 		mRight->writeSpeed(rs);
 	} // End if
@@ -148,6 +166,22 @@ void Robot::update() {
 	float straightOut = 0.0f;
 	float turnOut = 0.0f;
 
+
+  /*Serial.print("dir: ");
+  Serial.print(getDirection());
+  Serial.print("; Angle: ");
+  Serial.print(getAngle()*180.0/PI);
+  Serial.print("; X: ");
+  Serial.print(getX());
+  Serial.print("; Y: ");
+  Serial.println(getY());*/
+
+	float maxAccS = 1.8;
+	float maxDecS = 4.0;
+	float maxAccT = 5.0;
+	float maxDecT = 9.0;
+	float currentSpeed = 0.0;
+	float currentTurn = 0.0;
 	// State Machine
 	switch(sCurrentState) {
 		// constants for kMoving
@@ -155,42 +189,59 @@ void Robot::update() {
 		float turnInput;
 		float turnSetPoint;
 
-		case kMoving:
-			straightInput = euclidean(fX, fY, targetX, targetY);
-			turnInput = angleClamp(fAngle, targetAngle);
-			turnSetPoint = angleClamp(atan2(targetY-fY, targetX-fX), targetAngle);			
 
-			// re-added haha
-			if (straightInput < (1.5f*POS_DEADBAND)) {
-				turnOut = fMaxSpeed * pDriveAngle->compute(fAngle, targetAngle);
-				straightOut = fMaxSpeed * pPosition->compute(-1.0f * straightInput);
-			}
-			else {
-				straightOut = fMaxSpeed * pPosition->compute(-1.0f * straightInput);
-				turnOut = fMaxSpeed * pDriveAngle->compute(turnInput, turnSetPoint);
-			}
+
+		case kMoving:
+			//straightInput = euclidean(fX, fY, targetX, targetY);
+			straightInput = abs((targetX == lastTX) ? targetY - fY : targetX - fX);
+			straightOut = fMaxSpeed * (0.00 + pPosition->compute(-1.0f * straightInput));
+			//straightOut = fMaxSpeed * pow(pPosition->compute(-1.0f * straightInput), 2);
+
+			turnInput = angleClamp(fAngle, targetAngle);
+			turnSetPoint = angleClamp(atan2(targetY-fY + 3.0*sin(targetAngle), targetX-fX + 3.0*cos(targetAngle)), targetAngle);
+			//turnSetPoint = angleClamp(atan2(targetY-fY, targetX-fX), targetAngle);
+			turnOut = fMaxSpeed * pDriveAngle->compute(turnInput, turnSetPoint);
+
+			//if (straightInput < (1.5f*POS_DEADBAND))
+			//	turnOut = 0.33*fMaxSpeed*(pAngle->compute(fAngle, targetAngle) - 0.50);
 
 			if (straightInput < POS_DEADBAND) {
-				//sCurrentState = kWaiting;
-				sCurrentState = kTurning;
+				sCurrentState = kWaiting;
 				fAngle = angleClamp(fAngle, 0.0f);
+
 				pLeftSpeed->reset();
 				pRightSpeed->reset();
 			} else
+				//maxAcc = 1.0;
+				currentSpeed = getSpeed();
+				if (straightOut - currentSpeed >  maxAccS) straightOut = currentSpeed + maxAccS;
+				else
+				if (straightOut - currentSpeed < -maxDecS) straightOut = currentSpeed - maxDecS;
+
 				arcade(straightOut, turnOut);
 			break;
-		case kTurning:
-			turnOut = fMaxSpeed*pAngle->compute(angleClamp(fAngle, targetAngle), targetAngle);
 
-			if(abs(angleClamp(fAngle, targetAngle)-targetAngle) < ANGLE_DEADBAND) {
+		case kTurning:
+
+			turnInput = angleClamp(fAngle - targetAngle, 0);
+
+			if(abs(turnInput) < ANGLE_DEADBAND) {
 				sCurrentState = kWaiting;
 				mLeft->brake();
 				mRight->brake();
 				fAngle = angleClamp(fAngle, 0.0f);
 			}
 			else {
-				arcade(0.0f, turnOut);
+				//turnOut = fMaxSpeed*pAngle->compute(angleClamp(fAngle, targetAngle), targetAngle);
+				turnOut = fMaxSpeed*pAngle->compute(turnInput);
+
+				if (turnOut - currentTurn >  maxAccT) turnOut = currentTurn + maxAccT;
+				else
+				if (turnOut - currentTurn < -maxDecT) turnOut = currentTurn - maxDecT;
+
+				arcade(0.0, turnOut);
 			}
+
 			break;
 		case kWaiting:
 			// prevents build up
@@ -201,13 +252,12 @@ void Robot::update() {
 			mLeft->brake();
 			mRight->brake();
 
-			//pPosition->compute(0.0);
-			//pDriveAngle->compute(0.0);
-			//pAngle->compute(0.0);
+			//arcade(0.0, 0.0);
 
 			break;
 	}
 	/*
+	// csv compatible data
 	// actual speed
 	Serial.print(getSpeed()/70.0);
 	Serial.print(", ");
@@ -229,17 +279,28 @@ void Robot::update() {
 
 void Robot::setSetPosition(float newX, float newY) {
 	if(sCurrentState != kManual) {
+		lastTX = targetX;
+		lastTY = targetY;
 		targetX = newX;
 		targetY = newY;
 		sCurrentState = kMoving;
+
+		// prevents build up
+		pLeftSpeed->reset();
+		pRightSpeed->reset();
 	}
 }
 
 void Robot::setSetAngle(float newAngle) {
 	if(sCurrentState != kManual) {
+		lastTAngle = targetAngle;
 		targetAngle = angleClamp(newAngle, PI);
 		fAngle = angleClamp(fAngle, PI);
 		sCurrentState = kTurning;
+
+		// prevents build up
+		pLeftSpeed->reset();
+		pRightSpeed->reset();
 	}
 }
 
@@ -293,6 +354,26 @@ void Robot::changeSetAngle(float da) {
 	setSetAngle(targetAngle + da);
 }
 
-uint8_t Robot::getDirection() {
-	return (uint8_t) targetAngle * 2.0/PI;
+int Robot::getDirection() {
+	//return (int) (angleClamp(targetAngle, PI) * 2.0/PI);
+	int dir = (((int) ((targetAngle + PI/4) * 2.0/PI)) + 4) % 4;
+	return dir;
+}
+
+float Robot::getAngleToTarget(float distance) {
+	float direction = getDirection();
+
+	if (direction == 0) {
+    return atan2(targetY - fY, targetX - fX + distance);
+  }
+  else if (direction == 1) {
+    return atan2(targetY - fY + distance, targetX - fX);
+  }
+  else if (direction == 2) {
+    return atan2(targetY - fY, targetX - fX - distance);
+  }
+  else if (direction == 3) {
+    return atan2(targetY - fY - distance, targetX - fX);
+  }
+  return 0.0; // never get here
 }

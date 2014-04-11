@@ -44,6 +44,7 @@
 
  	// Set Points
  	float targetX, targetY, targetAngle;
+   float lastTX, lastTY, lastTAngle;
 
  	// Position Tracker
  	long lLastCountLeft, lLastCountRight;
@@ -100,7 +101,9 @@
    void changeSetY(float dy); // change target y by dy
    void changeSetAngle(float da); // change target angle by da
 
-   uint8_t getDirection();
+   int getDirection();
+
+   float getAngleToTarget(float distance);
 
    //void doInstructions(Instruction* instructions);
  };
