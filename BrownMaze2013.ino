@@ -95,8 +95,10 @@ void setup() {
   new PID(ANGLE_P_GAIN, ANGLE_I_GAIN, ANGLE_D_GAIN) // Angle PID Controller
   );
 
-  b.setValues(r, ws);
-  b.solveMaze();
+  Serial.println("starting maze");
+  delay(1000);
+  doMaze(r, ws);
+  Serial.println("done maze");
 }
 
 void loop() {
@@ -160,7 +162,7 @@ void loop() {
 
   // repeadetly turn
   //turnRight();
-  //turnLeft();
+  turnLeft();
 
   // back and forth
   //moveForward(TILE_LENGTH);
