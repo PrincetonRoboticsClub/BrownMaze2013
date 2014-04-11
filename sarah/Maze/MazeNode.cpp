@@ -18,40 +18,41 @@
 
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "MazeNode.h"
 #include <math.h>
 
 // enum Direction {UP = 1, DOWN = -1, RIGHT = 2, LEFT = -2};
 
-void MazeNode::setValues(char inCoords, char inStartDist, char inWalls) {
-   coords = inCoords; 
-   startDist = inStartDist; 
-   walls = inWalls; 
+void MazeNode::setValues(char inX, char inY, char inStartDist, char inWalls) {
+   coords = ((0x00 | inY) << 4) | inX; 
+   startDist = inStartDist;
+   walls = 0x0F & inWalls; 
 }
 
-char MazeNode::getXCoor() {
-   return (0x0F & coords);
+int MazeNode::getXCoor() {
+   return (0x000F & coords);
 }
 
-char MazeNode::getYCoor() {
-   return (0xF0 & coords);
+int MazeNode::getYCoor() {
+   return ((0x00F0 & coords) >> 4);
 }
 
 float MazeNode::getScore(float a, float b) {
    // 4.0001*manhattanDist + 0.9999*startDist + 4.0000*numOfTraversals
-   return 4.0001*getManhattanDist(a, b) + 0.9999*((int) startDist) + 4.0000*((int) (0x70 & walls));
+   return 4.0001*getManhattanDist(a, b) + 0.9999*(getStartDist()) + 4.0001*(getNumOfTraversals());
 }
 
 float MazeNode::getManhattanDist(float a, float b) {
-   return abs(((int) getXCoor()) - a) + abs(((int) getYCoor()) - b);
+   return fabs((float) getXCoor() - a) + fabs((float) getYCoor() - b);
 }
 
-char MazeNode::getStartDist() {
-   return startDist;
+int MazeNode::getStartDist() {
+   return 0x00FF & startDist;
 }
 
-char MazeNode::getNumOfTraversals() {
-   return (0x07 & (walls >> 4));
+int MazeNode::getNumOfTraversals() {
+   return (0x0007 & (walls >> 4));
 }
 
 bool MazeNode::hasWall(int dir) {
@@ -60,16 +61,18 @@ bool MazeNode::hasWall(int dir) {
       case -1: return (0x01 & (walls >> 1));
       case -2: return (0x01 & (walls >> 2));
       case 1: return (0x01 & (walls >> 3));
-      default: assert(false);
    }
 }
 
 // 0 000 ULDR
-void MazeNode::updateWalls(char newWalls) {
-   newWalls << 4;
-   newWalls >> 4; // clearing higher bits
-
-   walls = (walls & 0xF0) || newWalls;
+void MazeNode::updateWalls(bool newW[4]) {
+   char newWalls = 0x00;
+   for (int i = 3; i >= 0; i--) {
+      if (newW[i]) 
+         newWalls = newWalls | 0x01;
+      newWalls = newWalls << 1;
+   }
+   walls = (walls & 0xF0) | (newWalls >> 1);
 }
 
 void MazeNode::incrementNumOfTraversals() {
@@ -80,18 +83,19 @@ void MazeNode::setStartDist(char newStartDist) {
    startDist = newStartDist;
 }
 
-char MazeNode::getNumOfOpenWalls() {
-   char num = 0;
+int MazeNode::getNumOfOpenWalls() {
+   int num = 4;
    for (int i = 0; i < 4; i++) {
-      num += (walls >> i) & 0x01
+      if ((walls >> i) & 0x01) {
+         num--;
+      }
    }
    return num;
 }
 
-// STOPPED
 bool MazeNode::shouldTraverse() {
    // return (!deadEnd && numOfTraversals < getNumOfOpenWalls());
-   return (!isDeadEnd() && ((int) getNumOfTraversals() < (int) getNumOfOpenWalls()))
+   return (!isDeadEnd() && (getNumOfTraversals() < getNumOfOpenWalls()));
 }
 
 void MazeNode::markDeadEnd() {

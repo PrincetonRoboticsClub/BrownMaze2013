@@ -32,31 +32,31 @@ class MazeNode {
                 // walls: right (bit 0), down (bit 1), left (bit 2), up (bit 3)
 
   public:
-    void setValues(char inCoords, char inManhattanDist, char inStartDist, char inWalls);
+    void setValues(char inX, char inY, char inStartDist, char inWalls);
 
     /* Returns x coordinate */
-    char getXCoor();
+    int getXCoor();
 
     /* Returns y coordinate */
-    char getYCoor();
+    int getYCoor();
 
     /* Returns node's score (sum of manhattan and number of traversals) */
-    float getScore();
+    float getScore(float a, float b);
 
     /* Returns Manhattan distance */
-    float getManhattanDist();
+    float getManhattanDist(float a, float b);
 
     /* Returns start distance */
-    char getStartDist();
+    int getStartDist();
 
     /* Returns number of traversals of this node in finding the path */
-    char getNumOfTraversals();
+    int getNumOfTraversals();
     
     /* Returns whether or not there is a wall in the indicated direction */
-    bool hasWall(enum Direction dir);
+    bool hasWall(int dir);
 
     /* Walls should be low four bits */
-    void updateWalls(char newWalls);
+    void updateWalls(bool newW[4]);
 
     /* Increments the number of traversals. Cannot directly set the number 
        of traversals because such an action is too dangerous and does not 
@@ -66,7 +66,7 @@ class MazeNode {
     /* Changes start distcance */
     void setStartDist(char newStartDist);
 
-    char getNumOfOpenWalls();
+    int getNumOfOpenWalls();
 
     bool shouldTraverse();
 

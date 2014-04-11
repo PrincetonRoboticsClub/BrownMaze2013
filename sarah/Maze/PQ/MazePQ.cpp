@@ -23,12 +23,15 @@ void MazePQ::exch(int a, int b) {
 	heap[b] = temp;
 }
 
+float MazePQ::getNodeWeightedScore(MazeNode *n) {
+	return 4*n->getManhattanDist(7.5, 7.5) + 2*n->getNumOfTraversals();
+}
+
 bool MazePQ::nodeGreater(int a, int b) {
-	// test if a is greater than b
-	if (heap[a]->getScore() > heap[b]->getScore())
+	if (getNodeWeightedScore(heap[a]) > getNodeWeightedScore(heap[b]))
 		return true;
-	else if (heap[a]->getScore() == heap[b]->getScore() 
-		&& heap[a]->getManhattanDist() > heap[b]->getManhattanDist())
+	else if (getNodeWeightedScore(heap[a]) == getNodeWeightedScore(heap[b]) 
+		&& heap[a]->getNumOfTraversals() > heap[b]->getNumOfTraversals())
 		return true;
 
 	// if all tied or less than, returns false
@@ -76,4 +79,11 @@ int MazePQ::getSize() {
 	return N;
 }
 
+void MazePQ::removeLowest() {
+	N--;
+}
+
+MazeNode *MazePQ::peekLowest() {
+	return heap[N];
+}
 

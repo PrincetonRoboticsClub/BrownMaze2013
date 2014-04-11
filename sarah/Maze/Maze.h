@@ -12,36 +12,23 @@
 #ifndef MAZE_H
 #define MAZE_H
 
-#include "MazePQ.h"
 #include "MazeNode.h"
 #include <vector>
 
 class Maze {
 
   private:
-   int lengthX; // width (horizontal length) of maze
-   int lengthY; // length (vertical length) of maze
-   int numTraversed; // number of nodes traversed 
-   bool solutionFound; // whether or not a successful path has been found
-   enum Direction *path;
-   int pathLength;
+   // assume 16 by 16 maze
+   MazeNode mazeArray[256]; // should only be a pointer (4 bytes) plus 256*4 bytes for all the nodes
+   char nodeStart; // x coord is lower 4 bits, y coord is upper 4 bits 
+   char currentPosition; // x coord is lower 4 bits, y coord is upper 4 bits 
 
-   MazeNode** mazeArray; // an array of MazeNodes to represent rectangular maze
-
-   MazeNode *nodeStart; // pointer to MazeNode in mazeArray of start node
-   MazeNode *nodeTarget; // pointer to MazeNode in mazeArray of start node
-   MazeNode *currentPosition; // pointer to MazeNode in mazeArray of start node
-   MazePQ q;
+   char numTraversed; // only necessary for testing, 8 bits
+   bool solutionFound; // whether or not a successful path has been found, only necessary for testing
+   char mostInner;
 
   public:
-   /* Maze constructor takes dimensions of a rectangular maze represented
-      by an array of MazeNodes, and the coordinates of the start node and target 
-      node. The nodes are ordered so that the origin (0,0) node is in the 
-      top left. 
-
-      Old constructor: Maze(int lenX, int lenY, int startX, int startY, int targetX, int targetY);
-   */
-   void setValues(int lenX, int lenY, int startX, int startY, double targetX, double targetY);
+   void setValues(char startX, char startY);
 
    /* Returns the number of nodes traversed */
    int getNumOfNodesTraversed();
@@ -67,32 +54,38 @@ class Maze {
    /* Returns pointer node with specified coordinates */
    MazeNode *getNode(int x, int y);
 
-   /* Returns pointer adjacent node as indicated by dir to the specified coordinates */
-   MazeNode *getDirectionNode(int x, int y, enum Direction dir);
+   /* Returns pointer adjacent node as indicated by dir to the specified coordinates 
+      directions: {UP = 1, DOWN = -1, RIGHT = 2, LEFT = -2}; */
+   MazeNode *getDirectionNode(int x, int y, int dir);
 
-   bool canTravel(int x, int y, enum Direction dir);
+   bool canTravel(int x, int y, int dir);
 
    /* Increments number of Nodes traversed */
    void incrementNumOfNodesTraversed();
 
    /* Changes position of current node */
-   void changeCurrentNode(int x, int y);
-
-   /* Frees memory of nodes */
-   void freeMaze();
+   void changeCurrentNode(char x, char y);
 
    MazeNode *nextNodeAStar();
 
-   enum Direction *getAStarSolutionPath(int *length);
+   void getAStarSolutionPath(int path[256], int *length);
 
    /* Applies A Star algorithm */
    void applyAStarAlgorithm();
 
-   void applyMazeWalls(bool newwalls[16][16][4], int width, int height);
+   void applyMazeWalls(bool newwalls[16][16][4]);
 
    void updateStartDistances(int x, int y);
 
-   bool hasBetterScore(enum Direction dir, int x, int y, int score, MazeNode *next);
+   MazeNode *getMostInnerTraversed();
+
+   void updateMostInner();
+
+   /* directions: {UP = 1, DOWN = -1, RIGHT = 2, LEFT = -2}; */
+   bool hasBetterScore(int dir, int x, int y, float score, MazeNode *next);
+
+   int isAdjacent(int x, int y, int a, int b);
+
 };
 
 #endif
