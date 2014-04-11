@@ -4,7 +4,6 @@
 void Brain::setValues(Robot *in, WallSensor *wsin) {
 	maz.setValues(0, 15);
 	solved = false;
-	reset = false;
 	r = in;
 	ws = wsin;
 }
@@ -12,43 +11,30 @@ void Brain::setValues(Robot *in, WallSensor *wsin) {
 void Brain::solveMaze() {
 	MazeNode *next;
 	MazeNode *current;
-	int x;
-	int y;
 	int dir;
 
 	for (; ;) {
-		if (reset) { // how to reset????
-			// pause for replacement
-			startFromBeginning();
-			reset = false;
-		}
 
 		current = maz.getCurrentNode();
 		if (current == maz.getTargetNode()) {
 			solved = true;
 			return;
 		}
-		x = current->getXCoor();
-		y = current->getYCoor();
 
-		getWalls();
+		// getWalls();
 
 		next = maz.nextNodeAStar();
 
-		if (dir = maz.isAdjacent(x, y, next->getXCoor(), next->getYCoor())) {
+		if (dir = maz.isAdjacent(current->getXCoor(), current->getYCoor(), next->getXCoor(), next->getYCoor())) {
 			r->moveDirection(getRobotDir(dir), m);
 		}
 		else {
-			int path[256];
+			int path[50];
 			int length;
-			getPath(x, y, next->getXCoor(), next->getYCoor(), &length, path);
+			getPath(current->getXCoor(), current->getYCoor(), next->getXCoor(), next->getYCoor(), &length, path);
 			travelPath(&length, path);
 		}
 	}
-}
-
-void Brain::setReset() {
-	reset = true;
 }
 
 void Brain::travelPath(int *length, int path[]) {
@@ -218,11 +204,11 @@ int main(void) {
 	b.setValues();
 	b.solveMaze();
 
-	int length = b.getMaze()->getTargetNode()->getStartDist();
-	int path[length];
+	// int length = b.getMaze()->getTargetNode()->getStartDist();
+	// int path[length];
 
-	b.getPathToStart(&length, path, b.getMaze()->getTargetNode());
-	b.travelPath(&length, path);
+	// b.getPathToStart(&length, path, b.getMaze()->getTargetNode());
+	// b.travelPath(&length, path);
 
-	b.travelSolutionPath();
+	// b.travelSolutionPath();
 }

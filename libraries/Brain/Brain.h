@@ -10,7 +10,6 @@
 
 class Brain {
 	private:
-		bool reset;
 		bool solved;
 		Maze maz;
 		Robot *r;
@@ -20,8 +19,6 @@ class Brain {
 		void setValues(); //
 
 		void solveMaze();
-
-		void setReset();
 
 		void travelPath(int *length, int path[]);
 

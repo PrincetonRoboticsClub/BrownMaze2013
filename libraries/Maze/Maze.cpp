@@ -31,18 +31,11 @@ bool Maze::canTravel(int x, int y, int dir) {
    if (getNode(x, y)->hasWall(dir))
       return false;
 
-   // Tests if it is at the edge of the array
-   if (dir == 1) { // up
-      if (y == 0) return false;
-   }
-   else if (dir == -1) { // down
-      if (y == 16 - 1) return false;
-   } 
-   else if (dir == 2) { // right
-      if (x == 16 - 1) return false;
-   }
-   else if (dir == -2) { // left
-      if (x == 0) return false;
+   switch(dir) {
+      case 1: if (y == 0) return false; break;
+      case -1: if (y == 15) return false; break;
+      case 2: if (x == 15) return false; break;
+      case -2: if (x == 0) return false; break;
    }
    return true;
 }
@@ -112,14 +105,16 @@ MazeNode *Maze::getNode(int x, int y) {
 /* Returns pointer adjacent node as indicated by dir to the specified coordinates */
 // directions: {UP = 1, DOWN = -1, RIGHT = 2, LEFT = -2}; 
 MazeNode *Maze::getDirectionNode(int x, int y, int dir) {
-   if (dir == 1) // up
-      return &(mazeArray[getArrayIndex(x, y-1)]);
-   else if (dir == -1) // down
-      return &(mazeArray[getArrayIndex(x, y+1)]);
-   else if (dir == 2) // right
-      return &(mazeArray[getArrayIndex(x+1, y)]);
-   else if (dir == -2) // left
-      return &(mazeArray[getArrayIndex(x-1, y)]);
+   switch(dir) {
+      case 1: // up
+         return &(mazeArray[getArrayIndex(x, y-1)]);
+      case -1: // down
+         return &(mazeArray[getArrayIndex(x, y+1)]);
+      case 2: // right
+         return &(mazeArray[getArrayIndex(x+1, y)]);
+      case -2: // left
+         return &(mazeArray[getArrayIndex(x-1, y)]);
+   } 
 }
 
 /* Increments number of Nodes traversed */
@@ -161,7 +156,7 @@ void Maze::updateStartDistances(int x, int y) {
 
    // makes sure start distance of current node being considered is as small as possible
 
-   for (int j = -2; j <=2; j++) {
+   for (uint8_t j = -2; j <=2; j++) {
       if (j != 0) {
          if (canTravel(x, y, j)) { 
             if (getDirectionNode(x, y, j)->getStartDist() + 1 < tracker->getStartDist()) {
@@ -173,7 +168,7 @@ void Maze::updateStartDistances(int x, int y) {
 
    if (tracker->getNumOfTraversals() < 1) return;
 
-   for (int j = -2; j <=2; j++) {
+   for (uint8_t j = -2; j <=2; j++) {
       if (j != 0) {
          if (canTravel(x, y, j)) {
             if (tracker->getStartDist() + 1 < getDirectionNode(x, y, j)->getStartDist()) {
