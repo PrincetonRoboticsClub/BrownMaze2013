@@ -5,6 +5,9 @@
 #include <Arduino.h>
 #include <PinChangeInt.h>
 #include <WallSensor.h>
+#include <MazeNode.h>
+#include <Maze.h>
+#include <Brain.h>
 
 /** Robot Pin Definitions **/
 
@@ -57,6 +60,8 @@
 Robot* r;
 WallSensor* ws;
 
+Brain b;
+
 void setup() {
   delay(1000);
 
@@ -89,6 +94,9 @@ void setup() {
   new PID(DANGLE_P_GAIN, 0.0, DANGLE_D_GAIN), // Drive Angle PD Controller
   new PID(ANGLE_P_GAIN, ANGLE_I_GAIN, ANGLE_D_GAIN) // Angle PID Controller
   );
+
+  b.setValues(r, ws);
+  b.solveMaze();
 }
 
 void loop() {
@@ -151,7 +159,7 @@ void loop() {
   //moveForward(TILE_LENGTH);
 
   // repeadetly turn
-  turnRight();
+  //turnRight();
   //turnLeft();
 
   // back and forth
