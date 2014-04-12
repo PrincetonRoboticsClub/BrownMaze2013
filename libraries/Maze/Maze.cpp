@@ -135,27 +135,27 @@ void Maze::changeCurrentNode(char x, char y) {
 }
 
 /* Should only be called after A Star has been applied */
-void Maze::getAStarSolutionPath(int path[256], int *length) {
-   int dir;
-   MazeNode *tracker = getTargetNode();
-   *length = getTargetNode()->getStartDist();
+// void Maze::getAStarSolutionPath(int path[], int *length) {
+   // int dir;
+   // MazeNode *tracker = getTargetNode();
+   // *length = getTargetNode()->getStartDist();
 
-   for (int i = *length - 1; i >= 0; i--) {
-      int x = tracker->getXCoor();
-      int y = tracker->getYCoor();
+   // for (int i = *length - 1; i >= 0; i--) {
+   //    int x = tracker->getXCoor();
+   //    int y = tracker->getYCoor();
 
-      for (int j = -2; j <=2; j++) {
-         if (j != 0) {
-            if (canTravel(x, y, j) && (getDirectionNode(x, y, j)->getStartDist() == i)) {
-               dir = -j;
-               tracker = getDirectionNode(x, y, j);
-            }
-         }
-      }
+   //    for (int j = -2; j <=2; j++) {
+   //       if (j != 0) {
+   //          if (canTravel(x, y, j) && (getDirectionNode(x, y, j)->getStartDist() == i)) {
+   //             dir = -j;
+   //             tracker = getDirectionNode(x, y, j);
+   //          }
+   //       }
+   //    }
  
-      path[i] = dir;
-   }
-}
+   //    path[i] = dir;
+   // }
+// }
 
 void Maze::updateStartDistances(int x, int y) {
    // the current flaw in this code versus a star is that the start distance is not computer completely accurately
