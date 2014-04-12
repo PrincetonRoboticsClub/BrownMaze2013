@@ -15,7 +15,9 @@
 #include <stdio.h>
 #include <math.h>
 #include "Maze.h"
+#include <Arduino.h>
 
+#include <FreeRam.h>
 
 /* Returns 1-D array index x, y coordinates */
 static int getArrayIndex(int x, int y) {
@@ -31,11 +33,18 @@ bool Maze::canTravel(int x, int y, int dir) {
    if (getNode(x, y)->hasWall(dir))
       return false;
 
-   switch(dir) {
-      case 1: if (y == 0) return false; break;
-      case -1: if (y == 15) return false; break;
-      case 2: if (x == 15) return false; break;
-      case -2: if (x == 0) return false; break;
+   // Tests if it is at the edge of the array
+   if (dir == 1) { // up
+      if (y == 0) return false;
+   }
+   else if (dir == -1) { // down
+      if (y == 16 - 1) return false;
+   } 
+   else if (dir == 2) { // right
+      if (x == 16 - 1) return false;
+   }
+   else if (dir == -2) { // left
+      if (x == 0) return false;
    }
    return true;
 }
@@ -47,8 +56,8 @@ void Maze::setValues(char startX, char startY) {
       or paths traversed yet.*/	
    bool w[4] = {false, false, false, false};
 
-   for (char i = 0; i < 16; i++) {
-      for (char j = 0; j < 16; j++) {
+   for (uint8_t i = 0; i < 16; i++) {
+      for (uint8_t j = 0; j < 16; j++) {
          (mazeArray[getArrayIndex(i, j)]).setValues(i, j, 0xFF, 0x00);
       }
    }  
@@ -105,16 +114,14 @@ MazeNode *Maze::getNode(int x, int y) {
 /* Returns pointer adjacent node as indicated by dir to the specified coordinates */
 // directions: {UP = 1, DOWN = -1, RIGHT = 2, LEFT = -2}; 
 MazeNode *Maze::getDirectionNode(int x, int y, int dir) {
-   switch(dir) {
-      case 1: // up
-         return &(mazeArray[getArrayIndex(x, y-1)]);
-      case -1: // down
-         return &(mazeArray[getArrayIndex(x, y+1)]);
-      case 2: // right
-         return &(mazeArray[getArrayIndex(x+1, y)]);
-      case -2: // left
-         return &(mazeArray[getArrayIndex(x-1, y)]);
-   } 
+   if (dir == 1) // up
+      return &(mazeArray[getArrayIndex(x, y-1)]);
+   else if (dir == -1) // down
+      return &(mazeArray[getArrayIndex(x, y+1)]);
+   else if (dir == 2) // right
+      return &(mazeArray[getArrayIndex(x+1, y)]);
+   else if (dir == -2) // left
+      return &(mazeArray[getArrayIndex(x-1, y)]);
 }
 
 /* Increments number of Nodes traversed */
@@ -155,8 +162,7 @@ void Maze::updateStartDistances(int x, int y) {
    MazeNode *tracker = getNode(x, y);
 
    // makes sure start distance of current node being considered is as small as possible
-
-   for (uint8_t j = -2; j <=2; j++) {
+   for (int j = -2; j <=2; j++) {
       if (j != 0) {
          if (canTravel(x, y, j)) { 
             if (getDirectionNode(x, y, j)->getStartDist() + 1 < tracker->getStartDist()) {
@@ -168,7 +174,7 @@ void Maze::updateStartDistances(int x, int y) {
 
    if (tracker->getNumOfTraversals() < 1) return;
 
-   for (uint8_t j = -2; j <=2; j++) {
+   for (int j = -2; j <=2; j++) {
       if (j != 0) {
          if (canTravel(x, y, j)) {
             if (tracker->getStartDist() + 1 < getDirectionNode(x, y, j)->getStartDist()) {
@@ -182,6 +188,11 @@ void Maze::updateStartDistances(int x, int y) {
 }
 
 MazeNode *Maze::nextNodeAStar() {
+
+   Serial.print("Free Ram = ");
+   Serial.print(freeRam());
+   Serial.println(" Bytes");
+
    if (currentPosition == 0x77) return NULL;
    MazeNode *next = getCurrentNode();
    MazeNode *current = getCurrentNode();
@@ -269,7 +280,6 @@ MazeNode *Maze::nextNodeAStar() {
       }
    } 
 
-
    double score = 100000.0;
 
    // possibility of getting no node....
@@ -295,7 +305,7 @@ MazeNode *Maze::nextNodeAStar() {
       updateMostInner();
       next = getMostInnerTraversed();
    }
-   
+
    // use another mazenode variable to make sure it only goes in directions it has not gone before
    // use structure to track loops --> each "loop" has a certain number of nodes on it --> when you arrive at on 
       // of those nodes, look for new opening and follow that path --> do not return to loop

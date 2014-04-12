@@ -386,25 +386,25 @@ void Robot::moveDirection(int direction, uint8_t n) {
 	case 0:
 		setSetAngle(0);
 		waitForNext(INSTR_DELAY);
-		r->changeSetX((float)n*TILE_LENGTH);
+		changeSetX((float)n*TILE_LENGTH);
 		waitForNext(INSTR_DELAY);
 		break;
 	case 1:
 		setSetAngle(0);
 		waitForNext(INSTR_DELAY);
-		r->changeSetY((float)n*TILE_LENGTH);
+		changeSetY((float)n*TILE_LENGTH);
 		waitForNext(INSTR_DELAY);
 		break;
 	case 2:
 		setSetAngle(0);
 		waitForNext(INSTR_DELAY);
-		r->changeSetX((float)n*TILE_LENGTH*(-1.0f));
+		changeSetX((float)n*TILE_LENGTH*(-1.0f));
 		waitForNext(INSTR_DELAY);
 		break;
 	case 3:
 		setSetAngle(0);
 		waitForNext(INSTR_DELAY);
-		r->changeSetY((float)n*TILE_LENGTH*(-1.0f));
+		changeSetY((float)n*TILE_LENGTH*(-1.0f));
 		waitForNext(INSTR_DELAY);
 		break;
 	default:

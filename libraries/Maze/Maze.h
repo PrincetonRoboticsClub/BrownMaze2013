@@ -12,7 +12,7 @@
 #ifndef MAZE_H
 #define MAZE_H
 
-#include "MazeNode.h"
+#include <MazeNode.h>
 #include <vector>
 
 class Maze {

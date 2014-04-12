@@ -10,15 +10,18 @@
 
 class Brain {
 	private:
-		bool solved;
+		// bool reset;
+		// bool solved;
 		Maze maz;
 		Robot *r;
 		WallSensor *ws;
 
 	public:
-		void setValues(); //
+		void setValues(Robot *in, WallSensor *wsin); //
 
 		void solveMaze();
+
+		void setReset();
 
 		void travelPath(int *length, int path[]);
 
@@ -39,6 +42,13 @@ class Brain {
 		void travelSolutionPath();
 
 		Maze *getMaze(); //
+
 };
+
+void doMaze(Robot *r, WallSensor *ws);
+
+
+int freeRam ();
+
 
 #endif

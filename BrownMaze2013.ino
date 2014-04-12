@@ -1,3 +1,4 @@
+#include <FreeRam.h>
 #include <PID.h>
 #include <Encoder.h>
 #include <Motor.h>
@@ -57,6 +58,7 @@
 // ms delay for waits
 #define INSTRUCTION_DELAY 400
 
+
 Robot* r;
 WallSensor* ws;
 
@@ -99,6 +101,9 @@ void setup() {
   delay(1000);
   doMaze(r, ws);
   Serial.println("done maze");
+  //Serial.print("Free Ram = ");
+  //Serial.print(freeRam());
+  //Serial.println(" Bytes");
 }
 
 void loop() {
@@ -162,7 +167,7 @@ void loop() {
 
   // repeadetly turn
   //turnRight();
-  turnLeft();
+  //turnLeft();
 
   // back and forth
   //moveForward(TILE_LENGTH);
